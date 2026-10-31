@@ -1,0 +1,343 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T18:19:56.716264+00:00",
+  "title": "Design System: CW 小站",
+  "extensions": {
+    "colorMeta": {
+      "desk": {
+        "role": "neutral",
+        "displayName": "Desktop",
+        "tonalRamp": [
+          "oklch(15% 0.0109 100.84)",
+          "oklch(26% 0.0109 100.84)",
+          "oklch(38% 0.0109 100.84)",
+          "oklch(49% 0.0109 100.84)",
+          "oklch(61% 0.0109 100.84)",
+          "oklch(72% 0.0109 100.84)",
+          "oklch(84% 0.0109 100.84)",
+          "oklch(95% 0.0109 100.84)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Dark ink",
+        "tonalRamp": [
+          "oklch(15% 0.0260 176.57)",
+          "oklch(26% 0.0260 176.57)",
+          "oklch(38% 0.0260 176.57)",
+          "oklch(49% 0.0260 176.57)",
+          "oklch(61% 0.0260 176.57)",
+          "oklch(72% 0.0260 176.57)",
+          "oklch(84% 0.0260 176.57)",
+          "oklch(95% 0.0260 176.57)"
+        ]
+      },
+      "machine": {
+        "role": "neutral",
+        "displayName": "Olive metal",
+        "tonalRamp": [
+          "oklch(15% 0.0196 165.69)",
+          "oklch(26% 0.0196 165.69)",
+          "oklch(38% 0.0196 165.69)",
+          "oklch(49% 0.0196 165.69)",
+          "oklch(61% 0.0196 165.69)",
+          "oklch(72% 0.0196 165.69)",
+          "oklch(84% 0.0196 165.69)",
+          "oklch(95% 0.0196 165.69)"
+        ]
+      },
+      "machine-dark": {
+        "role": "neutral",
+        "displayName": "Deep olive metal",
+        "tonalRamp": [
+          "oklch(15% 0.0196 169.53)",
+          "oklch(26% 0.0196 169.53)",
+          "oklch(38% 0.0196 169.53)",
+          "oklch(49% 0.0196 169.53)",
+          "oklch(61% 0.0196 169.53)",
+          "oklch(72% 0.0196 169.53)",
+          "oklch(84% 0.0196 169.53)",
+          "oklch(95% 0.0196 169.53)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Printer paper",
+        "tonalRamp": [
+          "oklch(15% 0.0235 90.76)",
+          "oklch(26% 0.0235 90.76)",
+          "oklch(38% 0.0235 90.76)",
+          "oklch(49% 0.0235 90.76)",
+          "oklch(61% 0.0235 90.76)",
+          "oklch(72% 0.0235 90.76)",
+          "oklch(84% 0.0235 90.76)",
+          "oklch(95% 0.0235 90.76)"
+        ]
+      },
+      "brass": {
+        "role": "primary",
+        "displayName": "Aged brass",
+        "tonalRamp": [
+          "oklch(15% 0.0836 83.18)",
+          "oklch(26% 0.0836 83.18)",
+          "oklch(38% 0.0836 83.18)",
+          "oklch(49% 0.0836 83.18)",
+          "oklch(61% 0.0836 83.18)",
+          "oklch(72% 0.0836 83.18)",
+          "oklch(84% 0.0836 83.18)",
+          "oklch(95% 0.0836 83.18)"
+        ]
+      },
+      "light": {
+        "role": "neutral",
+        "displayName": "Light lettering",
+        "tonalRamp": [
+          "oklch(15% 0.0174 113.83)",
+          "oklch(26% 0.0174 113.83)",
+          "oklch(38% 0.0174 113.83)",
+          "oklch(49% 0.0174 113.83)",
+          "oklch(61% 0.0174 113.83)",
+          "oklch(72% 0.0174 113.83)",
+          "oklch(84% 0.0174 113.83)",
+          "oklch(95% 0.0174 113.83)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted lettering",
+        "tonalRamp": [
+          "oklch(15% 0.0205 143.01)",
+          "oklch(26% 0.0205 143.01)",
+          "oklch(38% 0.0205 143.01)",
+          "oklch(49% 0.0205 143.01)",
+          "oklch(61% 0.0205 143.01)",
+          "oklch(72% 0.0205 143.01)",
+          "oklch(84% 0.0205 143.01)",
+          "oklch(95% 0.0205 143.01)"
+        ]
+      },
+      "current": {
+        "role": "primary",
+        "displayName": "Active olive",
+        "tonalRamp": [
+          "oklch(15% 0.0549 152.35)",
+          "oklch(26% 0.0549 152.35)",
+          "oklch(38% 0.0549 152.35)",
+          "oklch(49% 0.0549 152.35)",
+          "oklch(61% 0.0549 152.35)",
+          "oklch(72% 0.0549 152.35)",
+          "oklch(84% 0.0549 152.35)",
+          "oklch(95% 0.0549 152.35)"
+        ]
+      },
+      "focus": {
+        "role": "semantic",
+        "displayName": "Ochre focus",
+        "tonalRamp": [
+          "oklch(15% 0.1184 71.21)",
+          "oklch(26% 0.1184 71.21)",
+          "oklch(38% 0.1184 71.21)",
+          "oklch(49% 0.1184 71.21)",
+          "oklch(61% 0.1184 71.21)",
+          "oklch(72% 0.1184 71.21)",
+          "oklch(84% 0.1184 71.21)",
+          "oklch(95% 0.1184 71.21)"
+        ]
+      },
+      "error": {
+        "role": "semantic",
+        "displayName": "Brick error",
+        "tonalRamp": [
+          "oklch(15% 0.1276 33.64)",
+          "oklch(26% 0.1276 33.64)",
+          "oklch(38% 0.1276 33.64)",
+          "oklch(49% 0.1276 33.64)",
+          "oklch(61% 0.1276 33.64)",
+          "oklch(72% 0.1276 33.64)",
+          "oklch(84% 0.1276 33.64)",
+          "oklch(95% 0.1276 33.64)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Chinese headline",
+        "purpose": "Page introduction."
+      },
+      "nameplate": {
+        "displayName": "Condensed nameplate",
+        "purpose": "Machine identity; CSS Barlow loads Barlow Condensed."
+      },
+      "readout": {
+        "displayName": "Target character",
+        "purpose": "Current target character."
+      },
+      "telegram": {
+        "displayName": "Printed telegram",
+        "purpose": "Character-by-character practice text."
+      },
+      "body": {
+        "displayName": "Chinese body",
+        "purpose": "Instructions and system text."
+      },
+      "label": {
+        "displayName": "Instrument label",
+        "purpose": "Quiet panel labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "cabinet",
+        "value": "inset 0 2px 1px #798078,inset 2px 0 2px #5f6b60,inset -2px 0 2px #27382d,inset 0 -5px 2px #233028,0 12px 0 -6px #28352d,0 25px 36px -15px #3f4d3c85,0 45px 65px -25px #3b45345e",
+        "purpose": "Beveled cabinet supported above the desk."
+      },
+      {
+        "name": "paper",
+        "value": "0 8px 13px #14291a6b",
+        "purpose": "Paper cast shadow."
+      },
+      {
+        "name": "dialog",
+        "value": "0 20px 60px #10271a66",
+        "purpose": "Modal elevation."
+      }
+    ],
+    "motion": [
+      {
+        "name": "key-press",
+        "value": "80ms ease-out",
+        "purpose": "Lever rotation and knob shadow compression."
+      },
+      {
+        "name": "mode-state",
+        "value": "150ms",
+        "purpose": "Mode background and text transitions."
+      },
+      {
+        "name": "toggle",
+        "value": "180ms",
+        "purpose": "Sound thumb translation."
+      },
+      {
+        "name": "mistake",
+        "value": "350ms ease-out",
+        "purpose": "Temporary brick-red current-character pulse."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "Reduced-motion animation and transition override; gap animation disabled."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "360px"
+      },
+      {
+        "name": "mobile",
+        "value": "650px"
+      },
+      {
+        "name": "wide",
+        "value": "1300px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Mode switch",
+      "kind": "nav",
+      "refersTo": "mode-switch",
+      "description": "Recessed three-mode selector.",
+      "html": "<nav class=\"ds-mode-switch\" aria-label=\"练习模式\"><button aria-pressed=\"true\">英文练习</button><button aria-pressed=\"false\">模拟通联</button><button aria-pressed=\"false\">自由发报</button></nav>",
+      "css": "button:focus-visible,input:focus-visible{outline:3px solid #b87e2d;outline-offset:5px}button{cursor:pointer;border:0;font-family:var(--body,\"PingFang SC\",\"Microsoft YaHei\",sans-serif)}button:disabled{opacity:.4;cursor:default}.ds-mode-switch{display:flex;width:340px;max-width:100%;padding:4px;background:#25352c;border-radius:6px;box-shadow:inset 0 2px 3px #1d2b24,0 1px 0 #61705b;margin-bottom:24px}.ds-mode-switch button{flex:1;font-size:12px;color:#bbc6b5;background:none;padding:10px 8px;border-radius:3px;transition:background .15s,color .15s}.ds-mode-switch button:hover{color:#fff}.ds-mode-switch button[aria-pressed=true]{background:linear-gradient(#d4d2bb,#bdbda6);color:#263e2d;box-shadow:0 2px 4px #16291c;font-weight:600}"
+    },
+    {
+      "name": "Practice paper",
+      "kind": "custom",
+      "refersTo": "paper",
+      "description": "Printed progress with completed, current, and pending characters.",
+      "html": "<section class=\"ds-paper\" aria-label=\"练习纸带\"><div class=\"ds-paper-top\"><div><span>入门短文</span><h2>A little every day</h2></div></div><div class=\"ds-paper-text\"><span class=\"ds-done\">A </span><span class=\"ds-current\">L</span><span class=\"ds-pending\">ITTLE EVERY DAY</span></div><div class=\"ds-paper-bottom\">已完成 1 / 64 字符</div></section>",
+      "css": "button:focus-visible,input:focus-visible{outline:3px solid #b87e2d;outline-offset:5px}button{cursor:pointer;border:0;font-family:var(--body,\"PingFang SC\",\"Microsoft YaHei\",sans-serif)}button:disabled{opacity:.4;cursor:default}.ds-paper:before{content:'';position:absolute;left:13px;top:16px;bottom:23px;border-left:1px dashed #b5b49d}.ds-paper:after{content:'';position:absolute;right:13px;top:16px;bottom:23px;border-right:1px dashed #b5b49d;pointer-events:none}.ds-paper-top{display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;border-bottom:1px solid #c6c8b4}.ds-paper-top>div>span{font-size:10px;letter-spacing:1px;color:#69705b}.ds-paper-top h2{font:16px var(--mono, 'DM Mono',monospace);margin-top:8px;color:#3b503e}.ds-pending{color:#626a55}.ds-done{color:#61735b;text-decoration:line-through;text-decoration-color:#86937a}.ds-current{color:#f6f1db;background:#3f6048;box-shadow:0 3px 0 #c1aa68;padding:2px 0}.ds-paper{position:relative;color:#3b4a37;background:linear-gradient(90deg,#e1dac4 0%,#f0ead9 4%,#f4eedf 50%,#eee6d1 96%,#d6cfba 100%);padding:25px 30px 0;box-shadow:0 8px 13px #14291a6b;clip-path:polygon(0 0,100% 0,100% calc(100% - 5px),99% 100%,98% calc(100% - 5px),97% 100%,96% calc(100% - 5px),95% 100%,94% calc(100% - 5px),93% 100%,92% calc(100% - 5px),91% 100%,90% calc(100% - 5px),89% 100%,88% calc(100% - 5px),87% 100%,86% calc(100% - 5px),85% 100%,84% calc(100% - 5px),83% 100%,82% calc(100% - 5px),81% 100%,80% calc(100% - 5px),79% 100%,78% calc(100% - 5px),77% 100%,76% calc(100% - 5px),75% 100%,74% calc(100% - 5px),73% 100%,72% calc(100% - 5px),71% 100%,70% calc(100% - 5px),69% 100%,68% calc(100% - 5px),67% 100%,66% calc(100% - 5px),65% 100%,64% calc(100% - 5px),63% 100%,62% calc(100% - 5px),61% 100%,60% calc(100% - 5px),59% 100%,58% calc(100% - 5px),57% 100%,56% calc(100% - 5px),55% 100%,54% calc(100% - 5px),53% 100%,52% calc(100% - 5px),51% 100%,50% calc(100% - 5px),49% 100%,48% calc(100% - 5px),47% 100%,46% calc(100% - 5px),45% 100%,44% calc(100% - 5px),43% 100%,42% calc(100% - 5px),41% 100%,40% calc(100% - 5px),39% 100%,38% calc(100% - 5px),37% 100%,36% calc(100% - 5px),35% 100%,34% calc(100% - 5px),33% 100%,32% calc(100% - 5px),31% 100%,30% calc(100% - 5px),29% 100%,28% calc(100% - 5px),27% 100%,26% calc(100% - 5px),25% 100%,24% calc(100% - 5px),23% 100%,22% calc(100% - 5px),21% 100%,20% calc(100% - 5px),19% 100%,18% calc(100% - 5px),17% 100%,16% calc(100% - 5px),15% 100%,14% calc(100% - 5px),13% 100%,12% calc(100% - 5px),11% 100%,10% calc(100% - 5px),9% 100%,8% calc(100% - 5px),7% 100%,6% calc(100% - 5px),5% 100%,4% calc(100% - 5px),3% 100%,2% calc(100% - 5px),1% 100%,0 calc(100% - 5px))}.ds-paper-text{font:21px/1.95 var(--mono, 'DM Mono',monospace);letter-spacing:1px;min-height:147px;max-height:180px;overflow-y:auto;padding:20px 1px 10px;position:relative;scroll-behavior:smooth;overflow-wrap:anywhere}.ds-paper-bottom{display:flex;align-items:center;gap:20px;padding:8px 0 13px;font-size:10px;color:#66705b;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Telegraph key",
+      "kind": "button",
+      "refersTo": "telegraph-key",
+      "description": "Mechanical lever with a pressed-state preview.",
+      "html": "<div class=\"ds-key-preview\"><button class=\"ds-telegraph-key\" aria-label=\"发报电键，按住发长音，短按发短音\" aria-pressed=\"false\">\n          <span class=\"ds-key-base\" aria-hidden=\"true\"><span class=\"ds-base-screw ds-left\"></span><span class=\"ds-base-screw ds-right\"></span><span class=\"ds-key-contact\"></span><span class=\"ds-key-pivot\"></span><span class=\"ds-key-arm\"><span class=\"ds-key-knob\"></span></span></span>\n          <span class=\"ds-key-touch-label\">按住发报</span>\n        </button></div>",
+      "css": "button:focus-visible,input:focus-visible{outline:3px solid #b87e2d;outline-offset:5px}button{cursor:pointer;border:0;font-family:var(--body,\"PingFang SC\",\"Microsoft YaHei\",sans-serif)}button:disabled{opacity:.4;cursor:default}.ds-telegraph-key{width:365px;max-width:85%;height:154px;position:relative;background:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;perspective:700px;border-radius:20px}.ds-key-base{position:absolute;left:25px;right:25px;bottom:30px;height:69px;border-radius:48% 48% 20px 20px;background:linear-gradient(170deg,#262f29,#18291f 60%,#1a281e);box-shadow:inset 0 2px 2px #8a9176,inset 0 -5px 3px #101d16,0 6px 4px #15291b,0 15px 18px -5px #1b2919b3;transform:rotate(-5deg)}.ds-base-screw{position:absolute;bottom:20px;width:12px;height:8px;background:linear-gradient(20deg,#bdba8d,#9a9b77 45%,#404b32 46%,#404b32 55%,#a6a77d 56%);border-radius:50%;box-shadow:0 2px 3px #0c1e12}.ds-base-screw.ds-left{left:17px}.ds-base-screw.ds-right{right:17px}.ds-key-contact{position:absolute;right:58px;bottom:29px;width:33px;height:30px;border-radius:5px;background:linear-gradient(90deg,#796c39,#d2bd7e 42%,#7f7547 90%);box-shadow:0 4px 3px #0c2112}.ds-key-pivot{position:absolute;left:61px;bottom:20px;width:61px;height:62px;border-radius:10px 10px 7px 7px;background:linear-gradient(90deg,#7d774f,#e0cd8c 25%,#a79962 70%,#5e5c3c);box-shadow:inset 0 2px 1px #eee3ae,4px 5px 5px #11251999}.ds-key-pivot:after{content:'';position:absolute;left:17px;top:15px;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 40% 30%,#e2d7a0,#776f45 65%,#3e4a2b);box-shadow:0 1px 2px #1b331e}.ds-key-arm{position:absolute;left:80px;right:47px;bottom:64px;height:14px;border-radius:5px;background:linear-gradient(#f2e6bd,#aa985b 34%,#e5cf8b 60%,#635c33);box-shadow:0 8px 9px #1526178c;transform:rotate(-8deg);transform-origin:0 50%;transition:transform 80ms ease-out}.ds-key-knob{position:absolute;right:-20px;bottom:-1px;width:102px;height:61px;border-radius:49%;background:radial-gradient(ellipse at 45% 15%,#596155,#303d30 38%,#18291d 70%);box-shadow:inset 0 2px 2px #7f8976,inset 0 -7px 2px #0e1d15,0 6px 3px #102119,0 12px 13px #10261780;transition:box-shadow 80ms ease-out}.ds-key-knob:after{content:'';position:absolute;inset:8px 10px 16px;border-radius:50%;border:1px solid #75826b3d}.ds-key-touch-label{position:absolute;bottom:3px;left:0;right:0;font-size:10px;color:#c4ccb4;letter-spacing:3px}.ds-telegraph-key.ds-pressed .ds-key-arm{transform:rotate(4deg)}.ds-telegraph-key.ds-pressed .ds-key-knob{box-shadow:inset 0 1px 1px #7f8976,inset 0 -4px 2px #0e1d15,0 3px 2px #102119,0 5px 7px #10261780}.ds-telegraph-key:hover .ds-key-touch-label{color:#f2ddb2}.ds-telegraph-key:active .ds-key-arm{transform:rotate(4deg)}.ds-telegraph-key:active .ds-key-knob{box-shadow:inset 0 1px 1px #7f8976,inset 0 -4px 2px #0e1d15,0 3px 2px #102119,0 5px 7px #10261780}@media(prefers-reduced-motion:reduce){.ds-key-arm,.ds-key-knob{transition-duration:.01ms}}.ds-key-preview{background:var(--machine,#394640);border-radius:22px;padding:20px;text-align:center}"
+    },
+    {
+      "name": "Sound toggle",
+      "kind": "button",
+      "refersTo": "sound-toggle",
+      "description": "Sound switch with pale metal thumb.",
+      "html": "<button class=\"ds-toggle\" role=\"switch\" aria-label=\"发报声音\" aria-checked=\"true\"><span></span></button>",
+      "css": "button:focus-visible,input:focus-visible{outline:3px solid #b87e2d;outline-offset:5px}button{cursor:pointer;border:0;font-family:var(--body,\"PingFang SC\",\"Microsoft YaHei\",sans-serif)}button:disabled{opacity:.4;cursor:default}.ds-toggle{position:relative;width:37px;height:21px;border-radius:12px;background:#1e3024;box-shadow:inset 0 2px 3px #102219;padding:3px;flex-shrink:0}.ds-toggle>span{display:block;width:15px;height:15px;border-radius:50%;background:linear-gradient(#e8e8d6,#a4ab91);box-shadow:0 2px 3px #152319;transition:transform .18s}.ds-toggle[aria-checked=true]{background:#8b9565}.ds-toggle[aria-checked=true]>span{transform:translateX(16px)}"
+    },
+    {
+      "name": "Sensitivity range",
+      "kind": "input",
+      "refersTo": "sensitivity-range",
+      "description": "Brass range thumb on a recessed track.",
+      "html": "<label class=\"ds-sensitivity-control\" style=\"color:#293c37\">识别灵敏度 · 180 ms<input type=\"range\" min=\"100\" max=\"300\" step=\"10\" value=\"180\" aria-label=\"识别灵敏度\"></label>",
+      "css": "button:focus-visible,input:focus-visible{outline:3px solid #b87e2d;outline-offset:5px}button{cursor:pointer;border:0;font-family:var(--body,\"PingFang SC\",\"Microsoft YaHei\",sans-serif)}button:disabled{opacity:.4;cursor:default}.ds-sensitivity-control{display:block;min-width:0}input[type=range]{width:100%;height:18px;margin:9px 0 0;background:transparent;cursor:pointer;appearance:none}input[type=range]::-webkit-slider-runnable-track{background:#1d3224;height:4px;border-radius:4px;box-shadow:0 1px 0 #718063}input[type=range]::-webkit-slider-thumb{appearance:none;width:15px;height:15px;background:linear-gradient(#e4d5a6,#a49262);border-radius:50%;margin-top:-6px;box-shadow:0 2px 3px #18311e}input[type=range]::-moz-range-track{background:#1d3224;height:4px}input[type=range]::-moz-range-thumb{background:#d0bb83;width:15px;height:15px;border:0;border-radius:50%}"
+    },
+    {
+      "name": "Metal action",
+      "kind": "button",
+      "refersTo": "metal-button",
+      "description": "Free-input editing action.",
+      "html": "<button class=\"ds-metal-button\">插入空格</button>",
+      "css": "button:focus-visible,input:focus-visible{outline:3px solid #b87e2d;outline-offset:5px}button{cursor:pointer;border:0;font-family:var(--body,\"PingFang SC\",\"Microsoft YaHei\",sans-serif)}button:disabled{opacity:.4;cursor:default}.ds-metal-button{background:#d1c7a9;color:#293c2c;padding:9px 16px;border-radius:4px;margin:15px 8px 0 0}"
+    },
+    {
+      "name": "Icon action",
+      "kind": "button",
+      "refersTo": "icon-button",
+      "description": "Compact audition action.",
+      "html": "<button class=\"ds-icon-button\" aria-label=\"试听当前字符\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m9 5 9 7-9 7Z\"/></svg></button>",
+      "css": "button:focus-visible,input:focus-visible{outline:3px solid #b87e2d;outline-offset:5px}button{cursor:pointer;border:0;font-family:var(--body,\"PingFang SC\",\"Microsoft YaHei\",sans-serif)}button:disabled{opacity:.4;cursor:default}button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}.ds-icon-button{background:none;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;color:inherit}.ds-icon-button:hover{background:#a7b19020}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Paper-and-Brass Telegraph",
+    "overview": "CW 小站 is a compact, physical-feeling practice instrument: muted olive metal surrounds a warm printed paper strip, with a brass lever and dark rounded knob below it. The user’s committed identity is a retro metal telegraph machine with paper above the tactile key.\n\nMaterial changes carry the hierarchy. Paper holds language and progress; the metal deck holds reception, timing, and controls. Shadows describe weight, recesses, and mechanical movement. The interface stays quiet enough for repeated practice, with Chinese instructions beside condensed Latin instrument markings and monospaced code.",
+    "keyCharacteristics": [
+      "Olive metal, warm paper, and restrained brass.",
+      "One centered instrument with paper above the tactile key.",
+      "Mechanical depth and immediate press feedback.",
+      "Distinct type roles for instructions, instrument labels, and telegrams."
+    ],
+    "rules": [
+      {
+        "name": "The Material Rule",
+        "body": "Use paper for the message and metal for the operating controls; preserve their visibly different surfaces.",
+        "section": "colors"
+      },
+      {
+        "name": "The Instrument Type Rule",
+        "body": "Use the condensed face for instrument markings, monospace for telegrams and Morse code, and system Chinese type for instructions.",
+        "section": "typography"
+      },
+      {
+        "name": "The Mechanical Depth Rule",
+        "body": "Use highlights and shadows to explain physical construction and movement.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the paper above the tactile key at every viewport width.",
+      "Do preserve visible keyboard focus and the reduced-motion override.",
+      "Do pair current-character color with progress position, and completed characters with a strike-through.",
+      "Do keep Chinese instructions readable beside the condensed and monospaced instrument typography."
+    ],
+    "donts": [
+      "Don't flatten the lever into a generic rectangular call-to-action; retain its pivot, arm, and knob.",
+      "Don't replace paper and metal with interchangeable cards; their material difference carries the hierarchy.",
+      "Don't make the small signal light the only feedback; retain accompanying text and paper state."
+    ]
+  }
+}

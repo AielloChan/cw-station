@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "CW 小站 · 摩尔斯电码练习",
+  "short_name": "CW 小站",
+  "description": "一支电键，一卷纸带。找到属于你的发报节奏。",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#303d3a",
+  "theme_color": "#303d3a",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
