@@ -9,19 +9,17 @@ const clamp = (value, min, max, fallback) => Number.isFinite(+value) ? Math.max(
 const settings = { sound: saved.sound !== false, threshold: clamp(saved.threshold, 100, 300, 180), gap: clamp(saved.gap, 300, 1200, 600), hint: saved.hint !== false };
 let mode = 'english', lessonIndex = 0, position = 0, attempts = 0, correct = 0, freeText = '', activeInput = null;
 let audition = false, auditionToken = 0, safetyTimer, pressTimer, installPrompt;
+let lastReceived = null;
 const feedback = text => { $('feedback').textContent = text; };
 const tone = new Sidetone(feedback);
 const lesson = () => LESSONS[mode]?.[lessonIndex];
 const target = () => lesson()?.text[position];
 const save = () => { try { localStorage.setItem('cw-station-settings', JSON.stringify(settings)); } catch { /* Private mode may disallow storage. */ } };
 const keyer = new MorseKeyer({ threshold: settings.threshold, gap: settings.gap,
-  onSequence(code) {
-    $('live-code').textContent = code ? pretty(code).split('').join(' ') : '等待敲击';
-    $('live-code').classList.toggle('has-signal', !!code);
-  },
+  onSequence() { renderReceiver(); },
   onLetter(letter, code) {
     $('gap-fill').classList.remove('counting');
-    $('decoded').textContent = letter ?? '?';
+    lastReceived = { letter, code, matched: mode === 'free' ? null : letter === target() };
     if (mode === 'free') {
       freeText += letter ?? '□';
       feedback(letter ? `已收到 ${letter} · ${pretty(code)}` : `未识别 ${pretty(code)}，可删除后重试。`);
@@ -30,7 +28,7 @@ const keyer = new MorseKeyer({ threshold: settings.threshold, gap: settings.gap,
       if (letter === target()) {
         correct++; position++;
         while (lesson().text[position] === ' ') position++;
-        feedback(position === lesson().text.length ? '这卷纸带完成了。漂亮！可以换一篇继续练习。' : `收到 ${letter}，继续保持这个节奏。`);
+        feedback(position === lesson().text.length ? '这卷纸带完成了。漂亮！可以换一篇继续练习。' : `${letter} 已完成，请输入 ${target()}。`);
       } else {
         feedback(`收到 ${letter ?? '未知编码'}（${pretty(code)}），目标是 ${target()}，再试一次。`);
         $('paper-text').classList.remove('mistake'); void $('paper-text').offsetWidth; $('paper-text').classList.add('mistake');
@@ -75,10 +73,23 @@ function renderPaper() {
 
 function renderTarget() {
   const char = target();
-  $('target-label').textContent = mode === 'free' ? '自由发报' : char ? '下一个字符' : '练习完成';
+  $('target-label').textContent = mode === 'free' ? '自由发报' : char ? '待输入字符' : '练习完成';
   $('target-letter').textContent = mode === 'free' ? 'CW' : char ?? '73';
   $('target-code').textContent = mode === 'free' ? '随心敲击' : char ? (settings.hint ? pretty(MORSE[char]).split('').join(' ') : '提示已隐藏') : '做得漂亮';
   $('listen').disabled = !char || !settings.sound;
+}
+
+function renderReceiver() {
+  const typing = keyer.started !== null || !!keyer.sequence;
+  const code = typing ? keyer.sequence : lastReceived?.code;
+  $('receiver-label').textContent = typing
+    ? (keyer.started !== null ? '正在输入' : '等待识别')
+    : lastReceived
+      ? (lastReceived.matched === true ? '上一字 · 正确' : lastReceived.matched === false ? '上一字 · 未匹配' : '上一字 · 已识别')
+      : '输入状态';
+  $('live-code').textContent = code ? pretty(code).split('').join(' ') : typing ? '按下中' : '等待敲击';
+  $('live-code').classList.toggle('has-signal', !!code);
+  $('decoded').textContent = !typing && lastReceived ? lastReceived.letter ?? '?' : '';
 }
 
 function setPressed(pressed) {
@@ -86,13 +97,16 @@ function setPressed(pressed) {
   $('signal-led').classList.toggle('lit', pressed); $('signal-state').textContent = pressed ? '正在发报' : '准备发报';
 }
 function cancelInput() {
+  const interrupted = activeInput !== null || !!keyer.sequence;
   activeInput = null; clearTimeout(safetyTimer); clearTimeout(pressTimer); keyer.reset(); tone.stop();
   audition = false; auditionToken++; setPressed(false); $('gap-fill').classList.remove('counting');
+  if (interrupted) feedback(mode === 'free' ? '未完成的输入已取消，可以重新敲击。' : `未完成的输入已取消，请重新输入 ${target()}。`);
 }
 function press(source) {
   if (activeInput !== null || audition || $('lesson-dialog').open || $('install-dialog').open) return;
   if (mode !== 'free' && !target()) { feedback('本篇已完成，点击「换一篇」开始新的练习。'); return; }
-  activeInput = source; keyer.press(); setPressed(true); tone.start(); $('decoded').textContent = '';
+  activeInput = source; keyer.press(); setPressed(true); tone.start(); renderReceiver();
+  feedback(mode === 'free' ? '正在输入；松开并停顿后自动识别。' : `正在输入 ${target()}；松开并停顿后自动识别。`);
   $('gap-fill').classList.remove('counting');
   pressTimer = setTimeout(() => { $('signal-state').textContent = '长音 −'; }, settings.threshold);
   safetyTimer = setTimeout(() => { cancelInput(); feedback('已松开发报电键，避免持续长鸣。再按即可继续。'); }, 10000);
@@ -100,6 +114,7 @@ function press(source) {
 function release(source) {
   if (activeInput !== source) return;
   activeInput = null; clearTimeout(safetyTimer); clearTimeout(pressTimer); tone.stop(); setPressed(false); keyer.release();
+  renderReceiver();
   if (keyer.sequence) {
     const fill = $('gap-fill'); fill.style.setProperty('--gap', `${settings.gap}ms`); void fill.offsetWidth; fill.classList.add('counting');
   }
@@ -109,7 +124,10 @@ key.addEventListener('pointerdown', event => { if (!event.isPrimary || event.but
 key.addEventListener('pointerup', event => release(event.pointerId));
 key.addEventListener('pointercancel', event => { if (activeInput === event.pointerId) cancelInput(); });
 key.addEventListener('lostpointercapture', event => { if (activeInput === event.pointerId) cancelInput(); });
-key.addEventListener('contextmenu', event => event.preventDefault());
+// A long touch belongs to the practice controls, not text selection or a callout.
+document.addEventListener('contextmenu', event => {
+  if (!event.target.closest('input, textarea, [contenteditable="true"]')) event.preventDefault();
+});
 const isEditing = element => element.closest('input, textarea, select, [contenteditable="true"], dialog') || (element.closest('button, a') && element !== key);
 window.addEventListener('keydown', event => {
   if (event.code !== 'Space' || isEditing(event.target)) return;
@@ -120,12 +138,12 @@ window.addEventListener('blur', cancelInput);
 document.addEventListener('visibilitychange', () => { if (document.hidden) cancelInput(); });
 
 function resetLesson() {
-  cancelInput(); position = attempts = correct = 0; freeText = ''; $('decoded').textContent = '';
+  cancelInput(); position = attempts = correct = 0; freeText = ''; lastReceived = null;
   $('lesson-title').textContent = mode === 'free' ? 'Your words, your rhythm.' : lesson().title;
   $('lesson-level').textContent = mode === 'free' ? '自由纸带' : lesson().level;
   $('choose-lesson').hidden = mode === 'free'; $('free-actions').hidden = mode !== 'free';
   feedback(mode === 'free' ? '随心发报；长停顿自动插入空格，更多设置里可以删字。' : '短按为点，长按为划；停顿后自动识别。');
-  renderPaper(); renderTarget();
+  renderPaper(); renderTarget(); renderReceiver();
 }
 document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => {
   if (mode === button.dataset.mode) return;

@@ -1,6 +1,42 @@
 import { test, expect } from '@playwright/test';
-async function tap(page, duration) {
-  const key = page.locator('#telegraph-key');
+async function typeMorse(page, text) {
+  const { MORSE } = await import('../../src/morse.js');
+  await page.locator('#telegraph-key').focus();
+  for (const letter of text.replaceAll(' ', '')) {
+    for (const mark of MORSE[letter]) {
+      await page.keyboard.down('Space'); await page.clock.runFor(mark === '.' ? 70 : 250); await page.keyboard.up('Space'); await page.clock.runFor(80);
+    }
+    await page.clock.runFor(600);
+  }
+}
+
+test('received A is clearly previous input while C is the next target', async ({ page }) => {
+  await page.goto('/'); await page.locator('#sound').click(); await page.clock.install();
+  await typeMorse(page, 'A LITTLE PRA');
+  await expect(page.locator('#paper-text .current')).toHaveText('C');
+  await expect(page.locator('#paper-progress')).toHaveText('已完成 10 / 66 字符');
+  await expect(page.locator('#decoded')).toHaveText('A');
+  await expect(page.locator('.signal-block .panel-label')).toHaveText('上一字 · 正确');
+  await expect(page.locator('#feedback')).toHaveText('A 已完成，请输入 C。');
+  await page.setViewportSize({ width: 615, height: 897 });
+  await page.screenshot({ path: '.impeccable/review/receiver-615.png', fullPage: true });
+  await page.locator('#telegraph-key').focus(); await page.keyboard.down('Space');
+  await expect(page.locator('.signal-block .panel-label')).toHaveText('正在输入');
+  await expect(page.locator('#decoded')).toHaveText('');
+  await expect(page.locator('#feedback')).toHaveText('正在输入 C；松开并停顿后自动识别。');
+  await page.clock.runFor(70); await page.keyboard.up('Space');
+  await expect(page.locator('.signal-block .panel-label')).toHaveText('等待识别');
+  await page.clock.runFor(600);
+  await expect(page.locator('#target-letter')).toHaveText('C');
+  await expect(page.locator('.signal-block .panel-label')).toHaveText('上一字 · 未匹配');
+  await expect(page.locator('#feedback')).toContainText('目标是 C');
+  await typeMorse(page, 'C');
+  await expect(page.locator('#decoded')).toHaveText('C');
+  await expect(page.locator('#target-letter')).toHaveText('T');
+  await expect(page.locator('#feedback')).toHaveText('C 已完成，请输入 T。');
+});
+async function tap(page, duration, selector = '#telegraph-key') {
+  const key = page.locator(selector);
   await key.scrollIntoViewIfNeeded();
   const box = await key.boundingBox();
   const client = await page.context().newCDPSession(page);
@@ -9,6 +45,25 @@ async function tap(page, duration) {
   await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   await client.detach();
 }
+test('long touches do not select practice text or open a context menu', async ({ page }) => {
+  await page.goto('/'); await page.locator('#sound').click();
+  await page.getByRole('button', { name: '自由发报', exact: true }).click();
+  await tap(page, 700, '#paper-text');
+  expect(await page.evaluate(() => window.getSelection().toString())).toBe('');
+  expect(await page.locator('#paper-text').evaluate(element => getComputedStyle(element).userSelect)).toBe('none');
+  expect(await page.locator('#feedback').evaluate(element => getComputedStyle(element).userSelect)).toBe('none');
+  expect(await page.locator('#paper-text').evaluate(element => {
+    const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    element.dispatchEvent(event); return event.defaultPrevented;
+  })).toBe(true);
+  await tap(page, 700);
+  await expect(page.locator('.free-output')).toHaveText('T');
+  await expect(page.locator('#telegraph-key')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#receiver-label')).toHaveText('上一字 · 已识别');
+  await page.getByRole('button', { name: '英文练习', exact: true }).click();
+  await expect(page.locator('#decoded')).toHaveText('');
+  await expect(page.locator('#receiver-label')).toHaveText('输入状态');
+});
 test('English exercise: incorrect character stays, A advances, restart resets', async ({ page }) => {
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('/'); await page.locator('#sound').click();
