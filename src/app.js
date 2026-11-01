@@ -4,6 +4,7 @@ import { Sidetone } from './audio.js';
 import { SendingSpeed } from './speed.js';
 import { PaperTransport } from './paper.js';
 import { filterLessons, randomLessonIndex, characterCount } from './library.js';
+import { setupConsole } from './console.js';
 
 const $ = id => document.getElementById(id);
 let saved = {};
@@ -158,6 +159,7 @@ function resetLesson() {
   cancelInput(); position = attempts = correct = 0; freeText = ''; lastReceived = null;
   speed.reset(); renderSpeed();
   $('lesson-title').textContent = mode === 'free' ? 'Your words, your rhythm.' : lesson().title;
+  $('lesson-title').title = $('lesson-title').textContent;
   $('lesson-level').textContent = mode === 'free' ? '自由纸带' : lesson().level;
   $('lesson-actions').hidden = mode === 'free'; $('free-actions').hidden = mode !== 'free';
   const credit = $('lesson-credit'); credit.replaceChildren(); credit.hidden = !lesson()?.author || mode === 'free';
@@ -165,6 +167,8 @@ function resetLesson() {
     const source = document.createElement('a'); source.href = lesson().source; source.target = '_blank'; source.rel = 'noopener noreferrer';
     source.textContent = '原作 ↗'; credit.append(`${lesson().author} · ${lesson().year} · `, source);
   }
+  $('settings-source').replaceChildren(...Array.from(credit.childNodes, node => node.cloneNode(true)));
+  $('settings-source').hidden = credit.hidden;
   feedback(mode === 'free' ? '随心发报；长停顿自动插入空格，更多设置里可以删字。' : '短按为点，长按为划；停顿后自动识别。');
   renderPaper(); renderTarget(); renderReceiver();
 }
@@ -235,8 +239,9 @@ function renderSpeed() {
   $('speed-comparison').textContent = stats.wpm > 0 ? `保持当前平均节奏，发出 100 个字符约需 ${Math.round(6000 / stats.cpm)} 秒。慢一点也没关系，先把每个字发清楚。` : '先敲出一个字符。速度会随着最近 30 秒的实际输出更新，停下来也会慢慢回落。';
 }
 setInterval(renderSpeed, 250);
-for (const [button, panel] of [['settings-button', 'advanced-settings'], ['reference-button', 'reference']]) {
-  $(button).addEventListener('click', () => { $(panel).hidden = !$(panel).hidden; $(button).setAttribute('aria-expanded', String(!$(panel).hidden)); });
+for (const [button, panel, close] of [['settings-button', 'settings-dialog', 'close-settings'], ['reference-button', 'reference', 'close-reference']]) {
+  $(button).addEventListener('click', () => { cancelInput(); $(panel).showModal(); });
+  $(close).addEventListener('click', () => $(panel).close());
 }
 function renderSettings() {
   $('sound').setAttribute('aria-checked', String(settings.sound)); $('sound-label').textContent = settings.sound ? '已开启' : '已关闭'; tone.setEnabled(settings.sound);
@@ -274,12 +279,13 @@ $('install').addEventListener('click', async () => {
   if (installPrompt) { await installPrompt.prompt(); await installPrompt.userChoice; installPrompt = null; }
   else $('install-dialog').showModal();
 });
-window.addEventListener('appinstalled', () => { $('install').hidden = true; });
-if (matchMedia('(display-mode: standalone)').matches) $('install').hidden = true;
+window.addEventListener('appinstalled', () => { $('install').hidden = true; $('install-from-settings').hidden = true; });
+$('install-from-settings').addEventListener('click', () => { $('settings-dialog').close(); $('install').click(); });
+if (matchMedia('(display-mode: standalone)').matches) { $('install').hidden = true; $('install-from-settings').hidden = true; }
 let offlineReady = false;
-function connection() { $('offline-state').textContent = !navigator.onLine ? (offlineReady ? '离线练习中' : '当前无网络') : offlineReady ? '离线已就绪' : '本地练习'; }
+function connection() { $('offline-state').textContent = !navigator.onLine ? (offlineReady ? '离线练习中' : '当前无网络') : offlineReady ? '离线已就绪' : '本地练习'; $('settings-connection').textContent = $('offline-state').textContent; }
 window.addEventListener('online', connection); window.addEventListener('offline', connection);
 if ('serviceWorker' in navigator && location.port !== '5173') {
   navigator.serviceWorker.register('./sw.js').then(() => navigator.serviceWorker.ready).then(() => { offlineReady = true; connection(); }).catch(() => { $('offline-state').textContent = '离线准备失败'; });
 }
-renderSettings(); resetLesson(); connection();
+renderSettings(); resetLesson(); connection(); setupConsole(cancelInput);

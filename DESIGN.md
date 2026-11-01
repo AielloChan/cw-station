@@ -141,9 +141,9 @@ On narrow screens, the headline becomes 25px, the nameplate 21px, the target rea
 
 The current operating surface centers a single cabinet with a maximum width of 884px. Desktop cabinet padding is 27px 44px 26px. The header has its own wider 1320px container. The paper is inset within the cabinet, followed by a two-column receiver, centered key, and a bottom controls row.
 
-At 650px and below, outer main padding becomes 12px and cabinet padding becomes 24px 19px 23px. Mode buttons remain on one row; the receiver stays in two columns. Sound and sensitivity share a two-column row while settings occupies a full row below. The key contracts to 320px by 144px and the keyboard hint is hidden. The reference grid changes from seven columns to three. At 360px and below, the secondary nameplate caption is hidden and range headings stack. The 1300px breakpoint only adjusts introductory spacing and minimum paper height.
+Phones (up to 767px wide, or short landscape viewports up to 1100px wide) default to a fixed 100dvh console. Safe area insets surround the cabinet. The external header, introduction, and footer disappear; the machine contains its own code table and supported fullscreen controls. Paper takes remaining height while the key and controls stay visible. The receiver and 30-second speed meter share a strip. Labels shorten to 音效、灵敏度、设置; category, author, signal status, and mechanical hints are removed from the compact face, with source and detailed settings available in the settings dialog. Phone heights up to 680px use a smaller key and tighter spacing. Landscape uses paper on the left and instruments/key on the right. Keep the paper above the key in portrait; landscape deliberately changes that relationship to fit the operating scene.
 
-The paper text area scrolls internally, with a maximum height of 180px on desktop and 175px on mobile. Keep long content contained in this writing surface. Advanced settings and the reference sheet begin collapsed; dialogs use a maximum width of 520px and remain within 85svh.
+The ordinary desktop retains its centered 884px cabinet and internally scrolling paper (maximum text height 180px). Desktop immersion expands the cabinet up to 1400px and fills available height, preserving exercise state; short desktop windows use a two-column console. Settings and the code table now open in dialogs instead of expanding the page. All console dialogs stay within the visual viewport, including software keyboard changes; long lists and guides scroll internally. Library and guide dialogs have their own larger width limits. The console styles and breakpoints live in src/console.css.
 
 ## Elevation & Depth
 
@@ -172,7 +172,7 @@ Sidecar previews are presentation samples; real press, sound, and decoding behav
 ## Do's and Don'ts
 
 ### Do:
-- Do keep the paper above the tactile key at every viewport width.
+- Do keep the paper above the tactile key in portrait and use the deliberate paper/key split in landscape.
 - Do preserve visible keyboard focus and the reduced-motion override.
 - Do pair current-character color with progress position, and completed characters with a strike-through.
 - Do keep Chinese instructions readable beside the condensed and monospaced instrument typography.

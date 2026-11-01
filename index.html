@@ -11,6 +11,7 @@
   <link rel="apple-touch-icon" href="./icon-192.png">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./src/styles.css">
+  <link rel="stylesheet" href="./src/console.css">
   <title>CW 小站 · 找到你的发报节奏</title>
 </head>
 <body>
@@ -22,7 +23,7 @@
     <div class="intro"><h1>把世界，敲成点和划。</h1><p>一支电键，一卷纸带。找到属于你的发报节奏。</p></div>
     <section class="station" aria-label="摩尔斯电码练习发报机">
       <span class="screw screw-tl" aria-hidden="true"></span><span class="screw screw-tr" aria-hidden="true"></span><span class="screw screw-bl" aria-hidden="true"></span><span class="screw screw-br" aria-hidden="true"></span>
-      <div class="station-top"><div class="nameplate"><strong>CW STATION</strong><span>手动电报练习机</span></div><div class="ready"><span id="signal-led" class="led"></span><span id="signal-state">准备发报</span></div></div>
+      <div class="station-top"><div class="nameplate"><strong>CW STATION</strong><span>手动电报练习机</span></div><div class="station-tools"><div class="ready"><span id="signal-led" class="led"></span><span id="signal-state">准备发报</span></div><button id="reference-button" class="station-tool" aria-haspopup="dialog" aria-controls="reference"><span>码表</span></button><button id="immersive-toggle" class="station-tool" aria-pressed="false" aria-label="切换沉浸模式"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span id="immersive-label">沉浸</span></button></div></div>
       <nav class="mode-switch" aria-label="练习模式"><button data-mode="english" aria-pressed="true">英文练习</button><button data-mode="qso" aria-pressed="false">模拟通联</button><button data-mode="free" aria-pressed="false">自由发报</button></nav>
       <div class="paper-assembly">
         <div class="roller" aria-hidden="true"></div>
@@ -35,16 +36,16 @@
         </section>
         </div>
       </div>
-      <div class="receiver">
+      <div class="instrument-strip"><div class="receiver">
         <div class="target-block"><span class="panel-label" id="target-label">待输入字符</span><div class="target-readout"><strong id="target-letter">A</strong><span id="target-code">· −</span><button id="listen" class="icon-button" aria-label="试听当前字符"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 9 7-9 7Z"/></svg></button></div></div>
         <div class="signal-block"><span class="panel-label" id="receiver-label">输入状态</span><div class="signal-readout"><span id="live-code">等待敲击</span><span id="decoded"></span></div><div class="gap-track"><div id="gap-fill"></div></div></div>
       </div>
-      <p id="feedback" class="feedback" role="status" aria-live="polite">短按为点，长按为划；停顿后自动识别。</p>
       <button id="speed-button" class="speed-meter" aria-haspopup="dialog" aria-controls="speed-dialog">
-        <span class="speed-caption"><span class="panel-label">平均发报速度 · 最近 30 s</span><span id="speed-sampling">敲击后开始计速</span></span>
+        <span class="speed-caption"><span class="panel-label"><span class="full-copy">平均发报速度 · 最近 30 s</span><span class="compact-copy">30s 均速</span></span><span id="speed-sampling">敲击后开始计速</span></span>
         <span class="speed-reading"><strong id="speed-value">0.0</strong><span>WPM</span></span>
         <span class="speed-more">速度手册 <span aria-hidden="true">↗</span></span>
       </button>
+      </div><p id="feedback" class="feedback" role="status" aria-live="polite">短按为点，长按为划；停顿后自动识别。</p>
       <div class="key-deck">
         <div class="key-meta"><span>手动电键</span><span>600 Hz</span></div>
         <button id="telegraph-key" class="telegraph-key" aria-label="发报电键，按住发长音，短按发短音" aria-pressed="false" aria-describedby="key-instructions">
@@ -54,16 +55,16 @@
         <div class="key-hint" id="key-instructions"><span>轻点 <b>·</b></span><span>长按 <b>−</b></span><span class="keyboard-hint">或按住 <kbd>Enter</kbd> / <kbd>空格</kbd></span></div>
       </div>
       <div class="controls">
-        <div class="sound-control"><div><span class="panel-label">发报声音</span><span id="sound-label">已开启</span></div><button id="sound" class="toggle" role="switch" aria-checked="true" aria-label="发报声音"><span></span></button></div>
-        <label class="sensitivity-control" for="sensitivity"><span class="range-heading"><span class="panel-label">识别灵敏度</span><output id="sensitivity-value">标准 · 180 ms</output></span><input id="sensitivity" type="range" min="100" max="300" step="10" value="180"><span class="range-ends"><span>轻快</span><span>从容</span></span></label>
-        <button id="settings-button" class="settings-button" aria-expanded="false" aria-controls="advanced-settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M9 4v6M15 14v6"/></svg>更多设置</button>
+        <div class="sound-control"><div><span class="panel-label"><span class="full-copy">发报声音</span><span class="compact-copy">音效</span></span><span id="sound-label">已开启</span></div><button id="sound" class="toggle" role="switch" aria-checked="true" aria-label="发报声音"><span></span></button></div>
+        <label class="sensitivity-control" for="sensitivity"><span class="range-heading"><span class="panel-label"><span class="full-copy">识别灵敏度</span><span class="compact-copy">灵敏度</span></span><output id="sensitivity-value">标准 · 180 ms</output></span><input id="sensitivity" type="range" min="100" max="300" step="10" value="180"><span class="range-ends"><span>轻快</span><span>从容</span></span></label>
+        <button id="settings-button" class="settings-button" aria-haspopup="dialog" aria-controls="settings-dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M9 4v6M15 14v6"/></svg><span class="full-copy">更多设置</span><span class="compact-copy">设置</span></button>
       </div>
-      <section id="advanced-settings" class="advanced-settings" hidden><label for="letter-gap">字符停顿 <output id="gap-value">600 ms</output><input id="letter-gap" type="range" min="300" max="1200" step="50" value="600"></label><p>松开后停顿这么久，就会识别一个字符。刚开始练习可调长一点。</p><label class="check-label"><input id="show-hint" type="checkbox" checked>显示下个字符的点划提示</label><div id="free-actions" hidden><button id="insert-space" class="metal-button">插入空格</button><button id="delete-letter" class="metal-button">删除上一字</button></div></section>
     </section>
-    <div class="below-station"><span>每一次停顿，也是节奏的一部分。</span><button id="reference-button" class="text-button" aria-expanded="false" aria-controls="reference">摩尔斯电码表 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM9 5v14M15 5v14M4 12h16"/></svg></button></div>
-    <section id="reference" class="reference" hidden aria-label="摩尔斯电码速查表"><h2>随手查一查</h2><p>先找到字符，再试着敲出它的节奏。</p><div id="reference-grid"></div></section>
+    <div class="below-station"><span>每一次停顿，也是节奏的一部分。</span></div>
     <footer><span>CW 小站</span><span>离线也能练习</span><span>73，愿电波常相伴。</span></footer>
   </main>
+  <dialog id="settings-dialog" aria-labelledby="settings-title"><div class="dialog-heading"><h2 id="settings-title">电台设置</h2><button class="icon-button" id="close-settings" aria-label="关闭设置"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><section id="advanced-settings" class="advanced-settings"><label for="letter-gap">字符停顿 <output id="gap-value">600 ms</output><input id="letter-gap" type="range" min="300" max="1200" step="50" value="600"></label><p>松开后停顿这么久，就会识别一个字符。刚开始练习可调长一点。</p><label class="check-label"><input id="show-hint" type="checkbox" checked>显示下个字符的点划提示</label><div id="free-actions" hidden><button id="insert-space" class="metal-button">插入空格</button><button id="delete-letter" class="metal-button">删除上一字</button></div><button id="install-from-settings" class="metal-button">安装到桌面</button><p id="settings-source"></p><p id="settings-connection">本地练习</p></section></dialog>
+  <dialog id="reference" aria-labelledby="reference-title"><div class="dialog-heading"><h2 id="reference-title">摩尔斯电码表</h2><button class="icon-button" id="close-reference" aria-label="关闭码表"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><p>先找到字符，再试着敲出它的节奏。</p><div id="reference-grid"></div></dialog>
   <dialog id="lesson-dialog" aria-labelledby="lesson-picker-title"><div class="dialog-heading"><h2 id="lesson-picker-title">选择练习内容</h2><button class="icon-button" id="close-lessons" aria-label="关闭"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="lesson-filters"><label>搜索作品、作者或内容<input id="lesson-search" type="search" placeholder="例如 Alice、Austen…" autocomplete="off"></label><div class="lesson-filter-row"><label>类别<select id="lesson-category"><option value="">全部类别</option></select></label><label>长度<select id="lesson-length"><option value="">不限长度</option><option value="short">短篇 · 150 字符内</option><option value="medium">中篇 · 151–250 字符</option><option value="long">长篇 · 250 字符以上</option></select></label></div><div class="lesson-list-meta"><span id="lesson-count" role="status"></span><button id="random-filtered" class="paper-button">从结果中随机选</button></div></div><div id="lesson-options"></div><button id="more-lessons" class="metal-button" hidden>加载更多</button><p class="library-note">经典英文原作节选，已转为大写并调整标点以适配电码。通联为虚构练习。节选与来源信息可离线浏览，外部链接需联网。</p></dialog>
   <dialog id="install-dialog"><div class="dialog-heading"><h2>把小站放在桌面上</h2><button class="icon-button" id="close-install" aria-label="关闭"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><p>iPhone / iPad：用 Safari 打开，点击「分享」，再选「添加到主屏幕」。</p><p>Android / 电脑：在浏览器菜单里选择「安装应用」或「添加到主屏幕」。</p><p>首次联网打开并准备好离线资源后，就能随时练习。</p></dialog>
   <dialog id="speed-dialog" tabindex="-1" aria-labelledby="speed-title">

@@ -97,7 +97,7 @@ test('English exercise: incorrect character stays, A advances, restart resets', 
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('/'); await page.locator('#sound').click();
   // Keyboard also works without focus on the telegraph button.
-  await page.locator('h1').click();
+  await page.locator('#lesson-title').click();
   await page.keyboard.down('Space'); await page.waitForTimeout(70); await page.keyboard.up('Space');
   await expect(page.locator('#feedback')).toContainText('目标是 A');
   await expect(page.locator('#target-letter')).toHaveText('A');
@@ -115,9 +115,10 @@ test('modes, picker, free text, settings persist and interruption cancels input'
   await page.locator('#telegraph-key').hover(); await page.mouse.down();
   await page.locator('#telegraph-key').dispatchEvent('pointercancel', { pointerId: 1 }); await page.mouse.up();
   await expect(page.locator('#telegraph-key')).toHaveAttribute('aria-pressed', 'false');
+  await page.locator('#sensitivity').fill('250');
   await page.locator('#settings-button').click(); await page.locator('#delete-letter').click();
   await expect(page.locator('.free-output')).toHaveText('');
-  await page.locator('#sensitivity').fill('250'); await page.locator('#letter-gap').fill('900');
+  await page.locator('#letter-gap').fill('900');
   await page.reload(); await expect(page.locator('#sensitivity')).toHaveValue('250');
   await expect(page.locator('#sound')).toHaveAttribute('aria-checked', 'false');
   await page.locator('#settings-button').click(); await expect(page.locator('#letter-gap')).toHaveValue('900');
@@ -178,6 +179,7 @@ test('speed meter follows a rolling window and handbook is accessible offline', 
   await typeMorse(page, 'E'); await page.locator('#settings-button').click();
   await page.locator('#delete-letter').click(); await page.locator('#insert-space').click();
   await expect(page.locator('#speed-value')).toHaveText('0.4');
+  await page.locator('#close-settings').click();
   await page.locator('#speed-button').click();
   await expect(page.locator('#speed-detail-accuracy')).toHaveText('—');
   await page.locator('#close-speed').click();
