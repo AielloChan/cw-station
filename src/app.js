@@ -127,10 +127,14 @@ key.addEventListener('pointerdown', event => { if (!event.isPrimary || event.but
 key.addEventListener('pointerup', event => release(event.pointerId));
 key.addEventListener('pointercancel', event => { if (activeInput === event.pointerId) cancelInput(); });
 key.addEventListener('lostpointercapture', event => { if (activeInput === event.pointerId) cancelInput(); });
-// A long touch belongs to the practice controls, not text selection or a callout.
-document.addEventListener('contextmenu', event => {
-  if (!event.target.closest('input, textarea, [contenteditable="true"]')) event.preventDefault();
-});
+// All surfaces behave like an instrument, including dialogs and future controls.
+for (const type of ['selectstart', 'contextmenu']) {
+  document.addEventListener(type, event => event.preventDefault(), { capture: true });
+}
+document.addEventListener('dblclick', event => {
+  event.preventDefault();
+  window.getSelection()?.removeAllRanges();
+}, { capture: true });
 const isEditing = element => element.closest('input, textarea, select, [contenteditable="true"], dialog') || (element.closest('button, a') && element !== key);
 window.addEventListener('keydown', event => {
   if (event.code !== 'Space' || isEditing(event.target)) return;

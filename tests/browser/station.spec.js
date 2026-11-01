@@ -45,10 +45,11 @@ async function tap(page, duration, selector = '#telegraph-key') {
   await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   await client.detach();
 }
-test('long touches do not select practice text or open a context menu', async ({ page }) => {
+test('long touches and double clicks never select text or open a context menu', async ({ page }) => {
   await page.goto('/'); await page.locator('#sound').click();
   await page.getByRole('button', { name: '自由发报', exact: true }).click();
   await tap(page, 700, '#paper-text');
+  await page.locator('#paper-text').dblclick();
   expect(await page.evaluate(() => window.getSelection().toString())).toBe('');
   expect(await page.locator('#paper-text').evaluate(element => getComputedStyle(element).userSelect)).toBe('none');
   expect(await page.locator('#feedback').evaluate(element => getComputedStyle(element).userSelect)).toBe('none');
@@ -63,6 +64,13 @@ test('long touches do not select practice text or open a context menu', async ({
   await page.getByRole('button', { name: '英文练习', exact: true }).click();
   await expect(page.locator('#decoded')).toHaveText('');
   await expect(page.locator('#receiver-label')).toHaveText('输入状态');
+  await page.locator('#speed-button').click();
+  await page.locator('#speed-title').dblclick();
+  expect(await page.evaluate(() => window.getSelection().toString())).toBe('');
+  expect(await page.locator('#speed-title').evaluate(element => {
+    const event = new Event('selectstart', { bubbles: true, cancelable: true });
+    element.dispatchEvent(event); return event.defaultPrevented;
+  })).toBe(true);
 });
 test('English exercise: incorrect character stays, A advances, restart resets', async ({ page }) => {
   const errors = []; page.on('pageerror', error => errors.push(error.message));
