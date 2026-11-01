@@ -79,9 +79,13 @@ test('long touches and double clicks never select text or open a context menu', 
     element.dispatchEvent(event); return event.defaultPrevented;
   })).toBe(true);
   await tap(page, 700);
+  await expect(page.locator('#telegraph-key')).toHaveCSS('outline-style', 'none');
   await expect(page.locator('.free-output')).toHaveText('T');
   await expect(page.locator('#telegraph-key')).toHaveAttribute('aria-pressed', 'false');
   await expect(page.locator('#receiver-label')).toHaveText('上一字 · 已识别');
+  await page.keyboard.press('Tab');
+  await expect(page.locator(':focus')).toHaveCSS('outline-style', 'solid');
+  await expect(page.locator(':focus')).toHaveCSS('outline-width', '3px');
   await page.getByRole('button', { name: '英文练习', exact: true }).click();
   await expect(page.locator('#decoded')).toHaveText('');
   await expect(page.locator('#receiver-label')).toHaveText('输入状态');

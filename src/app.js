@@ -130,6 +130,12 @@ function release(source) {
   }
 }
 const key = $('telegraph-key');
+// Safari can retain :focus-visible after focus() inside a prevented touch event.
+// Keep focus for keyboard control, but show the ring only after keyboard input.
+document.addEventListener('pointerdown', () => { document.documentElement.dataset.input = 'pointer'; }, { capture: true });
+document.addEventListener('keydown', event => {
+  if (!event.metaKey && !event.ctrlKey && !event.altKey && !event.isComposing) document.documentElement.dataset.input = 'keyboard';
+}, { capture: true });
 key.addEventListener('pointerdown', event => { if (!event.isPrimary || event.button !== 0) return; event.preventDefault(); key.focus({ preventScroll: true }); key.setPointerCapture(event.pointerId); press(event.pointerId); });
 key.addEventListener('pointerup', event => release(event.pointerId));
 key.addEventListener('pointercancel', event => { if (activeInput === event.pointerId) cancelInput(); });
