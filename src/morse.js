@@ -16,16 +16,23 @@ export const classify = (duration, threshold) => duration < 25 ? null : duration
 export class MorseKeyer {
   constructor({ threshold = 180, gap = 600, onSequence = () => {}, onLetter = () => {}, onWord = () => {}, now = () => performance.now(), schedule = (callback, delay) => setTimeout(callback, delay), unschedule = id => clearTimeout(id) } = {}) {
     Object.assign(this, { threshold, gap, onSequence, onLetter, onWord, now, schedule, unschedule });
-    this.sequence = ''; this.started = null; this.letterTimer = null; this.wordTimer = null;
+    this.sequence = ''; this.started = null; this.lastRelease = null; this.letterTimer = null; this.wordTimer = null;
   }
-  clearTimers() { this.unschedule(this.letterTimer); this.unschedule(this.wordTimer); }
+  clearTimers() { this.unschedule(this.letterTimer); this.unschedule(this.wordTimer); this.letterTimer = this.wordTimer = null; }
   press() {
     if (this.started !== null) return false;
-    this.clearTimers(); this.started = this.now(); return true;
+    const now = this.now();
+    // Input can reach the main thread before an overdue timer callback.
+    if (this.lastRelease !== null) {
+      if (this.sequence && now - this.lastRelease >= this.gap) this.flush();
+      if (this.wordTimer !== null && now - this.lastRelease >= this.gap * 7 / 3) this.onWord();
+    }
+    this.clearTimers(); this.started = now; return true;
   }
   release() {
     if (this.started === null) return;
-    const mark = classify(this.now() - this.started, this.threshold);
+    this.lastRelease = this.now();
+    const mark = classify(this.lastRelease - this.started, this.threshold);
     this.started = null;
     if (mark) {
       this.sequence += mark;
@@ -33,15 +40,16 @@ export class MorseKeyer {
     }
     if (this.sequence) {
       this.letterTimer = this.schedule(() => this.flush(), this.gap);
-      this.wordTimer = this.schedule(() => this.onWord(), this.gap * 2.5);
+      this.wordTimer = this.schedule(() => { this.wordTimer = null; this.onWord(); }, this.gap * 7 / 3);
     }
   }
   flush() {
     this.unschedule(this.letterTimer);
+    this.letterTimer = null;
     if (!this.sequence) return;
     const code = this.sequence; this.sequence = '';
     this.onLetter(decode(code), code); this.onSequence('');
   }
-  reset() { this.clearTimers(); this.started = null; this.sequence = ''; this.onSequence(''); }
+  reset() { this.clearTimers(); this.started = null; this.lastRelease = null; this.sequence = ''; this.onSequence(''); }
   configure(threshold, gap) { this.reset(); this.threshold = threshold; this.gap = gap; }
 }

@@ -5,12 +5,12 @@ import { SendingSpeed } from './speed.js';
 import { PaperTransport } from './paper.js';
 import { filterLessons, randomLessonIndex, characterCount } from './library.js';
 import { setupConsole } from './console.js';
+import { timingForTempo, loadTiming } from './timing.js';
 
 const $ = id => document.getElementById(id);
 let saved = {};
 try { saved = JSON.parse(localStorage.getItem('cw-station-settings') || '{}') || {}; } catch { /* Storage is optional. */ }
-const clamp = (value, min, max, fallback) => Number.isFinite(+value) ? Math.max(min, Math.min(max, +value)) : fallback;
-const settings = { sound: saved.sound !== false, threshold: clamp(saved.threshold, 100, 300, 180), gap: clamp(saved.gap, 300, 1200, 600), hint: saved.hint !== false };
+const settings = { sound: saved.sound !== false, ...loadTiming(saved), hint: saved.hint !== false };
 let mode = 'english', lessonIndex = 0, position = 0, attempts = 0, correct = 0, freeText = '', activeInput = null;
 let audition = false, auditionToken = 0, safetyTimer, pressTimer, installPrompt;
 let lastReceived = null;
@@ -93,11 +93,11 @@ function renderReceiver() {
   const typing = keyer.started !== null || !!keyer.sequence;
   const code = typing ? keyer.sequence : lastReceived?.code;
   $('receiver-label').textContent = typing
-    ? (keyer.started !== null ? '正在输入' : '等待识别')
+    ? (keyer.started !== null ? '正在输入' : `等待识别 · ${settings.gap}ms`)
     : lastReceived
       ? (lastReceived.matched === true ? '上一字 · 正确' : lastReceived.matched === false ? '上一字 · 未匹配' : '上一字 · 已识别')
       : '输入状态';
-  $('live-code').textContent = code ? pretty(code).split('').join(' ') : typing ? '按下中' : '等待敲击';
+  $('live-code').textContent = code ? pretty(code).split('').join(' ') : typing ? '按下中' : '按下开始';
   $('live-code').classList.toggle('has-signal', !!code);
   $('decoded').textContent = !typing && lastReceived ? lastReceived.letter ?? '?' : '';
 }
@@ -115,7 +115,9 @@ function cancelInput() {
 function press(source) {
   if (transport.busy || activeInput !== null || audition || document.querySelector('dialog[open]')) return;
   if (mode !== 'free' && !target()) { feedback('本篇已完成，点击「换一篇」开始新的练习。'); return; }
-  activeInput = source; speed.start(); keyer.press(); setPressed(true); tone.start(); renderReceiver();
+  activeInput = source; speed.start(); keyer.press();
+  if (mode !== 'free' && !target()) { activeInput = null; keyer.reset(); return; }
+  setPressed(true); tone.start(); renderReceiver();
   feedback(mode === 'free' ? '正在输入；松开并停顿后自动识别。' : `正在输入 ${target()}；松开并停顿后自动识别。`);
   $('gap-fill').classList.remove('counting');
   pressTimer = setTimeout(() => { $('signal-state').textContent = '长音 −'; }, settings.threshold);
@@ -251,12 +253,30 @@ for (const [button, panel, close] of [['settings-button', 'settings-dialog', 'cl
 }
 function renderSettings() {
   $('sound').setAttribute('aria-checked', String(settings.sound)); $('sound-label').textContent = settings.sound ? '已开启' : '已关闭'; tone.setEnabled(settings.sound);
-  $('sensitivity').value = settings.threshold; $('sensitivity-value').textContent = `${settings.threshold < 160 ? '轻快' : settings.threshold > 220 ? '从容' : '标准'} · ${settings.threshold} ms`;
-  $('letter-gap').value = settings.gap; $('gap-value').textContent = `${settings.gap} ms`; $('show-hint').checked = settings.hint; renderTarget();
+  $('tempo').value = settings.tempo; $('sensitivity-value').textContent = settings.timingMode === 'manual' ? '手动' : `${settings.tempo} WPM`;
+  $('sensitivity').value = settings.threshold; $('threshold-value').textContent = `${settings.threshold}ms`;
+  $('letter-gap').value = settings.gap; $('gap-value').textContent = `${settings.gap}ms`;
+  $('manual-timing').checked = settings.timingMode === 'manual'; $('manual-timing-controls').disabled = settings.timingMode !== 'manual';
+  $('manual-timing-controls').hidden = settings.timingMode !== 'manual';
+  const unit = settings.timingMode === 'manual' ? settings.threshold / 2 : timingForTempo(settings.tempo).unit;
+  $('timing-preview').textContent = `${settings.timingMode === 'manual' ? '手动设置' : `参考节奏 ${settings.tempo} WPM`}：点约 ${Math.round(unit)}ms，划约 ${Math.round(unit * 3)}ms；按压少于 ${settings.threshold}ms 判为点。字间等待 ${settings.gap}ms，自由模式停顿约 ${Math.round(settings.gap * 7 / 3)}ms 自动分词。`;
+  $('show-hint').checked = settings.hint; renderTarget();
 }
+function applyTiming() { cancelInput(); keyer.configure(settings.threshold, settings.gap); renderSettings(); save(); }
+function setTempo(value) {
+  const timing = timingForTempo(value);
+  Object.assign(settings, { tempo: timing.tempo, threshold: timing.threshold, gap: timing.gap, timingMode: 'tempo' });
+  applyTiming();
+}
+$('tempo').addEventListener('input', event => setTempo(event.target.value));
+document.querySelectorAll('[data-tempo]').forEach(button => button.addEventListener('click', () => setTempo(button.dataset.tempo)));
+$('manual-timing').addEventListener('change', event => {
+  if (!event.target.checked) setTempo(settings.tempo);
+  else { settings.timingMode = 'manual'; applyTiming(); }
+});
 $('sound').addEventListener('click', () => { cancelInput(); settings.sound = !settings.sound; renderSettings(); save(); });
-$('sensitivity').addEventListener('input', event => { cancelInput(); settings.threshold = +event.target.value; keyer.configure(settings.threshold, settings.gap); renderSettings(); save(); });
-$('letter-gap').addEventListener('input', event => { cancelInput(); settings.gap = +event.target.value; keyer.configure(settings.threshold, settings.gap); renderSettings(); save(); });
+$('sensitivity').addEventListener('input', event => { settings.timingMode = 'manual'; settings.threshold = +event.target.value; applyTiming(); });
+$('letter-gap').addEventListener('input', event => { settings.timingMode = 'manual'; settings.gap = +event.target.value; applyTiming(); });
 $('show-hint').addEventListener('change', event => { settings.hint = event.target.checked; renderTarget(); save(); });
 $('insert-space').addEventListener('click', () => { cancelInput(); if (freeText && !freeText.endsWith(' ')) freeText += ' '; renderPaper(); });
 $('delete-letter').addEventListener('click', () => { cancelInput(); freeText = freeText.slice(0, -1); renderPaper(); });
@@ -265,7 +285,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 $('listen').addEventListener('click', async () => {
   if (transport.busy) return;
   cancelInput(); const code = MORSE[target()]; if (!code || !settings.sound) return;
-  audition = true; const token = ++auditionToken; const unit = settings.threshold / 2;
+  audition = true; const token = ++auditionToken; const unit = settings.timingMode === 'manual' ? settings.threshold / 2 : timingForTempo(settings.tempo).unit;
   feedback(`听一听 ${target()}：${pretty(code)}`);
   for (const mark of code) {
     if (token !== auditionToken) return;

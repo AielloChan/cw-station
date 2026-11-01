@@ -163,7 +163,7 @@ Cabinet corners are broad and softened, shrinking from the machine radius to the
 - **Paper:** warm shaded sheet with a roller, perforated sides, and torn lower edge. Pending text is muted; completed characters fade and strike through; the current character uses a filled olive highlight and brass underline. A mistake briefly pulses brick red over 350ms.
 - **Telegraph key:** one semantic button contains decorative base, contact, pivot, arm, and knob. Pressing rotates the arm from −8° to 4° over 80ms and compresses the knob shadow. Keep the interaction tied to actual pressed state, not a looping animation.
 - **Sound toggle:** recessed pill with a pale metal thumb. `aria-checked=true` moves the thumb 16px on desktop or 14px on mobile; the transition is 180ms.
-- **Sensitivity range:** dark narrow track and circular brass thumb, paired with a visible timing output. Native range semantics remain available.
+- **Tempo range:** dark narrow track and circular brass thumb, paired with a WPM reference output. The main control is labeled 发报节奏 / 节奏 and links recognition cutoff, character pause and playback timing. Advanced independent controls are named 点划分界 and 字间等待, with current millisecond values and explanations. Native range semantics remain available.
 - **Secondary actions:** transparent text and circular icon controls keep the instrument face quiet. The pale metal button is reserved for visible free-input editing actions. Hover treatments vary by surface; do not invent new visual priority for them.
 - **Focus and reduced motion:** interactive elements receive a three-pixel ochre outline offset by five pixels. Reduced motion cuts animation and transition duration to 0.01ms, disables smooth scrolling, and shows the gap track immediately filled.
 

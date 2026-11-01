@@ -27,7 +27,7 @@ test('received A is clearly previous input while C is the next target', async ({
   await expect(page.locator('#decoded')).toHaveText('');
   await expect(page.locator('#feedback')).toHaveText('正在输入 C；松开并停顿后自动识别。');
   await page.clock.runFor(70); await page.keyboard.up('Space');
-  await expect(page.locator('.signal-block .panel-label')).toHaveText('等待识别');
+  await expect(page.locator('.signal-block .panel-label')).toContainText('等待识别');
   await page.clock.runFor(600);
   await expect(page.locator('#target-letter')).toHaveText('C');
   await expect(page.locator('.signal-block .panel-label')).toHaveText('上一字 · 未匹配');
@@ -52,19 +52,19 @@ test('Enter, numpad Enter and Space key by duration without interfering with eac
   await page.getByRole('button', { name: '自由发报', exact: true }).click();
   await page.locator('#telegraph-key').focus();
   await page.keyboard.down('Enter'); await page.clock.runFor(70); await page.keyboard.up('Enter');
-  await page.clock.runFor(700); await expect(page.locator('.free-output')).toHaveText('E');
+  await page.clock.runFor(400); await expect(page.locator('.free-output')).toHaveText('E');
   await page.keyboard.down('Enter'); await page.clock.runFor(100);
   await page.keyboard.down('Enter'); // repeat must not restart the press
   await page.keyboard.down('Space'); await page.keyboard.up('Space');
   await expect(page.locator('#telegraph-key')).toHaveAttribute('aria-pressed', 'true');
-  await page.clock.runFor(150); await page.keyboard.up('Enter'); await page.clock.runFor(700);
+  await page.clock.runFor(150); await page.keyboard.up('Enter'); await page.clock.runFor(400);
   await expect(page.locator('.free-output')).toHaveText('ET');
   await page.keyboard.down('NumpadEnter'); await page.clock.runFor(70); await page.keyboard.up('NumpadEnter');
-  await page.clock.runFor(700); await expect(page.locator('.free-output')).toHaveText('ETE');
+  await page.clock.runFor(400); await expect(page.locator('.free-output')).toHaveText('ETE');
   await page.locator('#sound').focus(); await page.keyboard.press('Enter');
   await expect(page.locator('#sound')).toHaveAttribute('aria-checked', 'true');
   await expect(page.locator('#telegraph-key')).toHaveAttribute('aria-pressed', 'false');
-  await page.clock.runFor(700); await expect(page.locator('.free-output')).toHaveText('ETE');
+  await page.clock.runFor(400); await expect(page.locator('.free-output')).toHaveText('ETE');
 });
 test('long touches and double clicks never select text or open a context menu', async ({ page }) => {
   await page.goto('/'); await page.locator('#sound').click();
@@ -119,8 +119,8 @@ test('modes, picker, free text, settings persist and interruption cancels input'
   await page.locator('#telegraph-key').hover(); await page.mouse.down();
   await page.locator('#telegraph-key').dispatchEvent('pointercancel', { pointerId: 1 }); await page.mouse.up();
   await expect(page.locator('#telegraph-key')).toHaveAttribute('aria-pressed', 'false');
-  await page.locator('#sensitivity').fill('250');
-  await page.locator('#settings-button').click(); await page.locator('#delete-letter').click();
+  await page.locator('#settings-button').click(); await page.locator('#manual-timing').check();
+  await page.locator('#sensitivity').fill('250'); await page.locator('#delete-letter').click();
   await expect(page.locator('.free-output')).toHaveText('');
   await page.locator('#letter-gap').fill('900');
   await page.reload(); await expect(page.locator('#sensitivity')).toHaveValue('250');

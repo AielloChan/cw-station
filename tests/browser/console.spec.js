@@ -23,7 +23,7 @@ test('console fits short phones, portrait, landscape and resized browser height'
   await page.addStyleTag({ content: '.console-mode main{padding:0 44px 21px!important}' });
   await assertConsoleFits(page); // Simulate the available space around a landscape notch/home indicator.
   await page.locator('#settings-button').click(); await expect(page.locator('#settings-title')).toBeVisible();
-  await page.locator('#letter-gap').fill('900'); await page.locator('#show-hint').uncheck();
+  await page.locator('#manual-timing').check(); await page.locator('#letter-gap').fill('900'); await page.locator('#show-hint').uncheck();
   await page.locator('#close-settings').click(); await assertConsoleFits(page);
   await page.locator('#reference-button').click(); await expect(page.locator('#reference-grid > div')).toHaveCount(46);
   await page.locator('#close-reference').click();
@@ -49,13 +49,13 @@ test('desktop immersion enters, exits, and preserves the current exercise', asyn
 test('touch slider remains draggable while the console and key remain stationary', async ({ page }) => {
   await page.setViewportSize({width:390,height:660}); await page.goto('/');
   const keyBefore=await page.locator('#telegraph-key').boundingBox();
-  const slider=await page.locator('#sensitivity').boundingBox();
+  const slider=await page.locator('#tempo').boundingBox();
   const client=await page.context().newCDPSession(page);
   const point=f=>({x:slider.x+slider.width*f,y:slider.y+slider.height/2,id:1});
   await client.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[point(.5)]});
   await client.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[point(.9)]});
   await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]}); await client.detach();
-  expect(Number(await page.locator('#sensitivity').inputValue())).toBeGreaterThan(220);
+  expect(Number(await page.locator('#tempo').inputValue())).toBeGreaterThan(30);
   await expect(page.locator('#telegraph-key')).toHaveAttribute('aria-pressed','false');
   expect(await page.locator('#telegraph-key').boundingBox()).toEqual(keyBefore);
 });
