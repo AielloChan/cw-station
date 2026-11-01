@@ -2,7 +2,7 @@
 
 一支电键，一卷纸带。复古金属发报机风格的摩尔斯电码练习 PWA。
 
-仓库：[AielloChan/cw-station](https://github.com/AielloChan/cw-station)。首版站点入口：[CW 小站](https://cw-station.huedrain2.chatgpt.site)（所有者私有）。
+仓库：[AielloChan/cw-station](https://github.com/AielloChan/cw-station)。在线练习：[CW 小站](https://aiellochan.github.io/cw-station/)（GitHub Pages，无需登录）。
 
 ## 功能
 
@@ -60,7 +60,9 @@ npm run test:browser
 
 ## 部署
 
-`npm run build` 生成 `dist/`，可发布到支持 HTTPS 的静态托管。资源路径为相对路径，兼容子路径部署。Sites 的站点标识保存在 `.openai/hosting.json`。新版本 Service Worker 会等待旧标签页关闭后激活，避免练习中突然重载；重新打开应用即可更新。
+推送到 `main` 后，GitHub Actions 自动执行单元测试、构建和桌面/手机浏览器测试，全部通过后将 `dist/` 发布到 GitHub Pages。Pull Request 只运行检查，不部署。也可手动触发工作流。
+
+`npm run build` 生成 `dist/`。资源路径为相对路径，兼容 `/cw-station/` 子路径部署。新版本 Service Worker 会等待旧标签页关闭后激活，避免练习中突然重载；重新打开应用即可更新。
 
 在 iOS 上用 Safari 的分享菜单「添加到主屏幕」。浏览器首次联网加载并显示「离线已就绪」后才能保证离线启动。微信内置浏览器的安装能力以实际浏览器支持为准，建议用系统浏览器打开。
 
