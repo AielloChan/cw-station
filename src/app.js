@@ -2,6 +2,8 @@ import { MORSE, pretty, MorseKeyer } from './morse.js';
 import { LESSONS } from './content.js';
 import { Sidetone } from './audio.js';
 import { SendingSpeed } from './speed.js';
+import { PaperTransport } from './paper.js';
+import { filterLessons, randomLessonIndex, characterCount } from './library.js';
 
 const $ = id => document.getElementById(id);
 let saved = {};
@@ -14,6 +16,10 @@ let lastReceived = null;
 const feedback = text => { $('feedback').textContent = text; };
 const tone = new Sidetone(feedback);
 const speed = new SendingSpeed();
+const transport = new PaperTransport(document.querySelector('.paper-assembly'), document.querySelector('.paper'), () => {
+  feedback(mode === 'free' ? '新纸已就位，随心发报。' : '新纸已就位，短按为点，长按为划。');
+});
+let requested = { mode, index: lessonIndex };
 const lesson = () => LESSONS[mode]?.[lessonIndex];
 const target = () => lesson()?.text[position];
 const save = () => { try { localStorage.setItem('cw-station-settings', JSON.stringify(settings)); } catch { /* Private mode may disallow storage. */ } };
@@ -106,7 +112,7 @@ function cancelInput() {
   if (interrupted) feedback(mode === 'free' ? '未完成的输入已取消，可以重新敲击。' : `未完成的输入已取消，请重新输入 ${target()}。`);
 }
 function press(source) {
-  if (activeInput !== null || audition || document.querySelector('dialog[open]')) return;
+  if (transport.busy || activeInput !== null || audition || document.querySelector('dialog[open]')) return;
   if (mode !== 'free' && !target()) { feedback('本篇已完成，点击「换一篇」开始新的练习。'); return; }
   activeInput = source; speed.start(); keyer.press(); setPressed(true); tone.start(); renderReceiver();
   feedback(mode === 'free' ? '正在输入；松开并停顿后自动识别。' : `正在输入 ${target()}；松开并停顿后自动识别。`);
@@ -146,34 +152,73 @@ window.addEventListener('keyup', event => {
   if (keyingCodes.has(event.code) && activeInput === source) { event.preventDefault(); release(source); }
 });
 window.addEventListener('blur', cancelInput);
-document.addEventListener('visibilitychange', () => { if (document.hidden) cancelInput(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { if (transport.busy) transport.finish(); cancelInput(); } });
 
 function resetLesson() {
   cancelInput(); position = attempts = correct = 0; freeText = ''; lastReceived = null;
   speed.reset(); renderSpeed();
   $('lesson-title').textContent = mode === 'free' ? 'Your words, your rhythm.' : lesson().title;
   $('lesson-level').textContent = mode === 'free' ? '自由纸带' : lesson().level;
-  $('choose-lesson').hidden = mode === 'free'; $('free-actions').hidden = mode !== 'free';
+  $('lesson-actions').hidden = mode === 'free'; $('free-actions').hidden = mode !== 'free';
+  const credit = $('lesson-credit'); credit.replaceChildren(); credit.hidden = !lesson()?.author || mode === 'free';
+  if (!credit.hidden) {
+    const source = document.createElement('a'); source.href = lesson().source; source.target = '_blank'; source.rel = 'noopener noreferrer';
+    source.textContent = '原作 ↗'; credit.append(`${lesson().author} · ${lesson().year} · `, source);
+  }
   feedback(mode === 'free' ? '随心发报；长停顿自动插入空格，更多设置里可以删字。' : '短按为点，长按为划；停顿后自动识别。');
   renderPaper(); renderTarget(); renderReceiver();
 }
 document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => {
-  if (mode === button.dataset.mode) return;
-  mode = button.dataset.mode; lessonIndex = 0;
-  document.querySelectorAll('[data-mode]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-  resetLesson();
+  if (requested.mode === button.dataset.mode) return;
+  changeLesson(button.dataset.mode, 0);
 }));
-$('restart').addEventListener('click', resetLesson);
-$('choose-lesson').addEventListener('click', () => {
-  cancelInput(); const options = $('lesson-options'); options.replaceChildren();
-  LESSONS[mode].forEach((item, index) => {
+function changeLesson(nextMode, index) {
+  requested = { mode: nextMode, index }; cancelInput();
+  feedback('正在换纸…');
+  transport.replace(() => {
+    mode = nextMode; lessonIndex = index;
+    document.querySelectorAll('[data-mode]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.mode === mode)));
+    resetLesson(); $('paper-text').scrollTop = 0; feedback('正在送纸，稍候即可发报。');
+  });
+}
+$('restart').addEventListener('click', () => { if (transport.busy) transport.finish(); resetLesson(); });
+let visibleLessons = 20;
+const filteredLessons = () => filterLessons(LESSONS[mode] || [], { query: $('lesson-search').value, category: $('lesson-category').value, length: $('lesson-length').value });
+function renderLessonList() {
+  const matches = filteredLessons(), options = $('lesson-options'); options.replaceChildren();
+  $('lesson-count').textContent = `${matches.length} / ${LESSONS[mode].length} 篇`;
+  $('random-filtered').disabled = !matches.length;
+  if (!matches.length) { const empty = document.createElement('p'); empty.textContent = '没有匹配的内容，试试别的关键词或放宽筛选。'; options.append(empty); }
+  for (const { lesson: item, index } of matches.slice(0, visibleLessons)) {
     const button = document.createElement('button'); button.className = 'lesson-option';
+    if (index === lessonIndex) button.setAttribute('aria-current', 'true');
     const title = document.createElement('strong'); title.textContent = item.title;
-    const description = document.createElement('span'); description.textContent = `${item.level} · ${item.text.replaceAll(' ', '').length} 字符`;
+    const description = document.createElement('span'); description.textContent = `${item.author || '小站原创'} · ${item.level} · ${characterCount(item)} 字符${index === lessonIndex ? ' · 当前' : ''}`;
     const preview = document.createElement('p'); preview.textContent = item.text;
     button.append(title, description, preview);
-    button.addEventListener('click', () => { lessonIndex = index; $('lesson-dialog').close(); resetLesson(); }); options.append(button);
-  }); $('lesson-dialog').showModal();
+    button.addEventListener('click', () => { $('lesson-dialog').close(); if (index !== lessonIndex) changeLesson(mode, index); }); options.append(button);
+  }
+  $('more-lessons').hidden = matches.length <= visibleLessons;
+}
+function chooseRandom(indices, nextMode = mode) {
+  const index = randomLessonIndex(indices, requested.mode === nextMode ? requested.index : -1);
+  if (index !== null) changeLesson(nextMode, index);
+}
+$('random-lesson').addEventListener('click', () => {
+  const nextMode = requested.mode === 'free' ? mode : requested.mode;
+  chooseRandom(LESSONS[nextMode].map((_, index) => index), nextMode);
+});
+$('random-filtered').addEventListener('click', () => { const indices = filteredLessons().map(item => item.index); $('lesson-dialog').close(); chooseRandom(indices); });
+for (const id of ['lesson-search', 'lesson-category', 'lesson-length']) {
+  $(id).addEventListener(id === 'lesson-search' ? 'input' : 'change', () => { visibleLessons = 20; renderLessonList(); });
+}
+$('more-lessons').addEventListener('click', () => { visibleLessons += 20; renderLessonList(); });
+$('choose-lesson').addEventListener('click', () => {
+  if (transport.busy) transport.finish(); cancelInput();
+  if (mode === 'free') return;
+  $('lesson-search').value = ''; $('lesson-length').value = ''; $('lesson-category').replaceChildren(new Option('全部类别', ''));
+  for (const category of new Set(LESSONS[mode].map(item => item.level))) $('lesson-category').append(new Option(category, category));
+  visibleLessons = 20; renderLessonList(); $('lesson-dialog').showModal(); $('lesson-options').scrollTop = 0;
 });
 $('close-lessons').addEventListener('click', () => $('lesson-dialog').close());
 $('close-install').addEventListener('click', () => $('install-dialog').close());
@@ -207,6 +252,7 @@ $('delete-letter').addEventListener('click', () => { cancelInput(); freeText = f
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 $('listen').addEventListener('click', async () => {
+  if (transport.busy) return;
   cancelInput(); const code = MORSE[target()]; if (!code || !settings.sound) return;
   audition = true; const token = ++auditionToken; const unit = settings.threshold / 2;
   feedback(`听一听 ${target()}：${pretty(code)}`);

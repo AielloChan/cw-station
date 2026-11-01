@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+// Exercise logic deterministically; the physical transport has its own motion tests.
+test.beforeEach(async ({ page }) => { await page.emulateMedia({ reducedMotion: 'reduce' }); });
 async function typeMorse(page, text) {
   const { MORSE } = await import('../../src/morse.js');
   await page.locator('#telegraph-key').focus();
@@ -132,7 +134,7 @@ test('offline app shell reloads, fonts load, layout fits and reference opens', a
 
 test('narrow screens remain usable and every paper character can be completed', async ({ page }) => {
   await page.goto('/'); await page.setViewportSize({ width: 320, height: 740 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.locator('#sound').click();
   await page.clock.install();
   const text = 'A LITTLE PRACTICE EVERY DAY GOES A LONG WAY. TAKE YOUR TIME AND FIND YOUR RHYTHM.';

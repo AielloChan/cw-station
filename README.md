@@ -6,7 +6,9 @@
 
 ## 功能
 
-- 英文短文、模拟 CW 通联、自由发报三种模式，各带三份预置练习（自由模式无预置）。
+- 英文练习 103 篇（100 段经典原作节选及 3 篇基础练习）、21 组模拟 CW 通联、自由发报。
+- 支持按作品/作者/正文搜索、类别与长度筛选、分批列表选篇，以及避开当前篇目的随机换篇；内容全部内置，可离线选择。
+- 换篇与切换模式时模拟滚筒换纸：退纸、纸头探出、停顿校正、分段送纸、压平落稳。支持连续操作、切后台收尾与减少动态效果。
 - 按压真实时长决定点划，鼠标、触屏和键盘 Enter（含数字键盘）、空格均可操作；键盘长按不因按键重复而重复发报，其他控件保留自己的键盘操作。
 - 逐字核对、当前字符点划提示、试听、完成进度和本轮准确率。
 - 最近 30 秒滑动窗口平均发报速度，点击查看实时统计与带来源的速度手册。
@@ -66,6 +68,9 @@ npm run test:browser
 | `src/audio.js` | Web Audio 侧音与静音保护 |
 | `src/speed.js` | 带可注入时钟的 30 秒发报统计 |
 | `src/content.js` | 原创短文与模拟通联内容 |
+| `src/readings.js` | 100 段经典原作节选与作者、年份、来源 |
+| `src/library.js` | 内容检索、长度筛选与随机选择 |
+| `src/paper.js` | 可中断的滚筒换纸动画 |
 | `src/app.js` | 练习状态、交互和 PWA 安装 |
 | `src/styles.css` | 机身、纸带、电键及响应式布局 |
 | `scripts/build.mjs` | 静态构建、基于资源内容哈希生成离线缓存 |
@@ -87,3 +92,4 @@ Barlow Condensed 与 DM Mono 通过 Google Fonts 官方仓库取得，许可证�
 
 - [MDN Pointer events](https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events)
 - [MDN Using Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers)
+- [内容来源与机械动作依据](docs/library-and-paper.md)

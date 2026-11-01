@@ -1,0 +1,63 @@
+import { test, expect } from '@playwright/test';
+
+test('library searches all excerpts, combines filters, selects and randomizes offline', async ({ page, context }, info) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' }); await page.goto('/');
+  await expect(page.locator('#offline-state')).toHaveText('离线已就绪');
+  await page.locator('#choose-lesson').click();
+  await expect(page.locator('#lesson-count')).toHaveText('103 / 103 篇');
+  await expect(page.locator('.lesson-option')).toHaveCount(20);
+  await page.locator('#more-lessons').click(); await expect(page.locator('.lesson-option')).toHaveCount(40);
+  await page.locator('#lesson-search').fill('austen');
+  await expect(page.locator('.lesson-option')).toHaveCount(10);
+  await page.locator('#lesson-category').selectOption('童话奇想');
+  await expect(page.locator('#lesson-count')).toHaveText('0 / 103 篇');
+  await expect(page.locator('#random-filtered')).toBeDisabled();
+  await page.locator('#lesson-category').selectOption('');
+  await page.locator('#lesson-search').fill('wonderland');
+  await page.screenshot({ path: `.impeccable/review/library-${info.project.name}.png` });
+  await page.locator('.lesson-option').first().click();
+  await expect(page.locator('#lesson-title')).toHaveText("Alice's Adventures in Wonderland · 01");
+  await expect(page.locator('#lesson-credit')).toContainText('Lewis Carroll');
+  await expect(page.locator('#speed-value')).toHaveText('0.0');
+  await context.setOffline(true); await page.reload();
+  await page.locator('#choose-lesson').click(); await page.locator('#lesson-search').fill('walden');
+  await page.locator('#random-filtered').click(); await expect(page.locator('#lesson-title')).toContainText('Walden');
+  const before = await page.locator('#lesson-title').textContent();
+  await page.locator('#choose-lesson').click(); await page.locator('#lesson-search').fill('walden');
+  await page.locator('#random-filtered').click(); await expect(page.locator('#lesson-title')).not.toHaveText(before);
+  await page.setViewportSize({ width: 320, height: 740 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole('button', { name: '模拟通联', exact: true }).click();
+  await page.locator('#choose-lesson').click(); await expect(page.locator('#lesson-count')).toHaveText('21 / 21 篇');
+});
+
+test('paper ejects then feeds with staged alignment; latest request wins and background settles', async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' }); await page.goto('/'); await page.locator('#sound').click();
+  const assembly = page.locator('.paper-assembly');
+  const before = await page.locator('.paper-window').boundingBox();
+  await page.getByRole('button', { name: '模拟通联', exact: true }).click();
+  await expect(assembly).toHaveAttribute('data-transport', 'eject');
+  await page.locator('#telegraph-key').focus(); await page.keyboard.down('Enter'); await page.waitForTimeout(70); await page.keyboard.up('Enter');
+  await expect(page.locator('#telegraph-key')).toHaveAttribute('aria-pressed', 'false');
+  await expect(assembly).toHaveAttribute('data-transport', 'feed');
+  await page.evaluate(() => {
+    const animation = document.querySelector('.paper').getAnimations()[0];
+    animation.pause(); animation.currentTime = 225; // paper caught, paused for alignment
+  });
+  await page.screenshot({ path: `.impeccable/review/paper-catch-${info.project.name}.png`, fullPage: true });
+  const during = await page.locator('.paper-window').boundingBox();
+  expect(Math.abs(during.y-before.y)).toBeLessThan(2);
+  await page.evaluate(() => document.querySelector('.paper').getAnimations()[0].play());
+  await expect(assembly).not.toHaveAttribute('aria-busy', 'true');
+  await expect(page.locator('#lesson-title')).toHaveText('第一次呼叫');
+  await page.getByRole('button', { name: '英文练习', exact: true }).click();
+  await page.getByRole('button', { name: '自由发报', exact: true }).click();
+  await page.getByRole('button', { name: '模拟通联', exact: true }).click();
+  await expect(assembly).not.toHaveAttribute('aria-busy', 'true');
+  await expect(page.locator('#lesson-title')).toHaveText('第一次呼叫');
+  expect(await page.locator('.paper').evaluate(el => el.getAnimations().length)).toBe(0);
+  await page.locator('#random-lesson').click();
+  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange')); });
+  await expect(assembly).not.toHaveAttribute('aria-busy', 'true');
+  await expect(page.locator('#lesson-title')).not.toHaveText('第一次呼叫');
+});
