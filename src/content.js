@@ -1,5 +1,7 @@
 import { READINGS } from './readings.js';
+import { BASICS } from './basics.js';
 export const LESSONS = {
+  learn: BASICS,
   english: [
     { title: 'A little every day', level: '入门短文', text: 'A LITTLE PRACTICE EVERY DAY GOES A LONG WAY. TAKE YOUR TIME AND FIND YOUR RHYTHM.' },
     { title: 'Across the ocean', level: '英文短文', text: 'THE NIGHT IS QUIET. A SMALL SIGNAL CROSSES THE OCEAN. SOMEWHERE A FRIEND IS LISTENING.' },

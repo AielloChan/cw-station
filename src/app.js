@@ -10,7 +10,8 @@ import { timingForTempo, loadTiming } from './timing.js';
 const $ = id => document.getElementById(id);
 let saved = {};
 try { saved = JSON.parse(localStorage.getItem('cw-station-settings') || '{}') || {}; } catch { /* Storage is optional. */ }
-const settings = { sound: saved.sound !== false, ...loadTiming(saved), hint: saved.hint !== false };
+let normalTiming = loadTiming(saved), learningTiming = loadTiming(saved.learnTiming || { tempo: 8, timingMode: 'tempo' });
+const settings = { sound: saved.sound !== false, ...normalTiming, hint: saved.hint !== false };
 let mode = 'english', lessonIndex = 0, position = 0, attempts = 0, correct = 0, freeText = '', activeInput = null;
 let audition = false, auditionToken = 0, safetyTimer, pressTimer, installPrompt;
 let lastReceived = null;
@@ -18,12 +19,13 @@ const feedback = text => { $('feedback').textContent = text; };
 const tone = new Sidetone(feedback);
 const speed = new SendingSpeed();
 const transport = new PaperTransport(document.querySelector('.paper-assembly'), document.querySelector('.paper'), () => {
-  feedback(mode === 'free' ? '新纸已就位，随心发报。' : '新纸已就位，短按为点，长按为划。');
+  feedback(mode === 'free' ? '新纸已就位，随心发报。' : mode === 'learn' ? (settings.sound ? '基础课已就位。先点 ▶ 听节奏，再逐字跟练。' : '基础课已就位，照着点划逐字跟练。') : '新纸已就位，短按为点，长按为划。');
 });
 let requested = { mode, index: lessonIndex };
 const lesson = () => LESSONS[mode]?.[lessonIndex];
 const target = () => lesson()?.text[position];
-const save = () => { try { localStorage.setItem('cw-station-settings', JSON.stringify(settings)); } catch { /* Private mode may disallow storage. */ } };
+const activeTiming = () => ({ tempo: settings.tempo, timingMode: settings.timingMode, threshold: settings.threshold, gap: settings.gap });
+const save = () => { try { localStorage.setItem('cw-station-settings', JSON.stringify({ ...settings, ...(mode === 'learn' ? normalTiming : {}), learnTiming: mode === 'learn' ? activeTiming() : learningTiming })); } catch { /* Private mode may disallow storage. */ } };
 const keyer = new MorseKeyer({ threshold: settings.threshold, gap: settings.gap,
   onSequence() { renderReceiver(); },
   onLetter(letter, code) {
@@ -38,7 +40,11 @@ const keyer = new MorseKeyer({ threshold: settings.threshold, gap: settings.gap,
       if (letter === target()) {
         correct++; position++;
         while (lesson().text[position] === ' ') position++;
-        feedback(position === lesson().text.length ? '这卷纸带完成了。漂亮！可以换一篇继续练习。' : `${letter} 已完成，请输入 ${target()}。`);
+        if (position === lesson().text.length) {
+          feedback(mode === 'learn'
+            ? (lessonIndex < LESSONS.learn.length - 1 ? '本课完成！可以点「下一课」继续，也可以重来巩固。' : '基础复习完成！可以选课回练，或重来巩固。')
+            : '这卷纸带完成了。漂亮！可以换一篇继续练习。');
+        } else feedback(`${letter} 已完成，请输入 ${target()}。`);
       } else {
         feedback(`收到 ${letter ?? '未知编码'}（${pretty(code)}），目标是 ${target()}，再试一次。`);
         $('paper-text').classList.remove('mistake'); void $('paper-text').offsetWidth; $('paper-text').classList.add('mistake');
@@ -61,15 +67,32 @@ function renderPaper() {
     paper.scrollTop = paper.scrollHeight;
   } else {
     let offset = 0;
-    for (const word of lesson().text.split(' ')) {
-      const group = document.createElement('span'); group.className = 'word';
-      for (const char of word) {
-        const span = document.createElement('span'); span.textContent = char;
-        span.className = offset < position ? 'done' : offset === position ? 'current' : 'pending';
-        if (offset === position) span.setAttribute('aria-current', 'true');
-        group.append(span); offset++;
+    if (mode === 'learn') {
+      const intro = document.createElement('p'); intro.className = 'drill-intro'; intro.textContent = '先听，再敲。短按 ·，长按 −；每个字之间稍停。'; paper.append(intro);
+      for (const row of lesson().rows) {
+        const line = document.createElement('div'); line.className = 'drill-row';
+        const code = document.createElement('span'); code.className = 'drill-code';
+        code.textContent = [...row].every(char => char === row[0]) ? `${row[0]}  ${pretty(MORSE[row[0]])}` : '混合';
+        const chars = document.createElement('span'); chars.className = 'drill-chars';
+        for (const char of row) {
+          const span = document.createElement('span'); span.textContent = char;
+          span.className = offset < position ? 'done' : offset === position ? 'current' : 'pending';
+          if (offset === position) span.setAttribute('aria-current', 'true');
+          chars.append(span); offset++;
+        }
+        line.append(code, chars); paper.append(line); offset++;
       }
-      paper.append(group, document.createTextNode(' ')); offset++;
+    } else {
+      for (const word of lesson().text.split(' ')) {
+        const group = document.createElement('span'); group.className = 'word';
+        for (const char of word) {
+          const span = document.createElement('span'); span.textContent = char;
+          span.className = offset < position ? 'done' : offset === position ? 'current' : 'pending';
+          if (offset === position) span.setAttribute('aria-current', 'true');
+          group.append(span); offset++;
+        }
+        paper.append(group, document.createTextNode(' ')); offset++;
+      }
     }
     const total = lesson().text.replaceAll(' ', '').length;
     const done = lesson().text.slice(0, position).replaceAll(' ', '').length;
@@ -85,7 +108,7 @@ function renderTarget() {
   const char = target();
   $('target-label').textContent = mode === 'free' ? '自由发报' : char ? '待输入字符' : '练习完成';
   $('target-letter').textContent = mode === 'free' ? 'CW' : char ?? '73';
-  $('target-code').textContent = mode === 'free' ? '随心敲击' : char ? (settings.hint ? pretty(MORSE[char]).split('').join(' ') : '提示已隐藏') : '做得漂亮';
+  $('target-code').textContent = mode === 'free' ? '随心敲击' : char ? (mode === 'learn' || settings.hint ? pretty(MORSE[char]).split('').join(' ') : '提示已隐藏') : '做得漂亮';
   $('listen').disabled = !char || !settings.sound;
 }
 
@@ -170,6 +193,10 @@ function resetLesson() {
   $('lesson-title').title = $('lesson-title').textContent;
   $('lesson-level').textContent = mode === 'free' ? '自由纸带' : lesson().level;
   $('lesson-actions').hidden = mode === 'free'; $('free-actions').hidden = mode !== 'free';
+  $('choose-lesson').firstChild.textContent = mode === 'learn' ? '选课 ' : '换一篇 ';
+  $('random-lesson').hidden = mode === 'learn';
+  $('next-basic').hidden = mode !== 'learn';
+  $('next-basic').disabled = mode === 'learn' && lessonIndex === LESSONS.learn.length - 1;
   const credit = $('lesson-credit'); credit.replaceChildren(); credit.hidden = !lesson()?.author || mode === 'free';
   if (!credit.hidden) {
     const source = document.createElement('a'); source.href = lesson().source; source.target = '_blank'; source.rel = 'noopener noreferrer';
@@ -188,17 +215,24 @@ function changeLesson(nextMode, index) {
   requested = { mode: nextMode, index }; cancelInput();
   feedback('正在换纸…');
   transport.replace(() => {
+    if (nextMode === 'learn' && mode !== 'learn') {
+      normalTiming = activeTiming(); Object.assign(settings, learningTiming);
+    } else if (mode === 'learn' && nextMode !== 'learn') {
+      learningTiming = activeTiming(); Object.assign(settings, normalTiming);
+    }
     mode = nextMode; lessonIndex = index;
+    keyer.configure(settings.threshold, settings.gap); renderSettings(); save();
     document.querySelectorAll('[data-mode]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.mode === mode)));
     resetLesson(); $('paper-text').scrollTop = 0; feedback('正在送纸，稍候即可发报。');
   });
 }
 $('restart').addEventListener('click', () => { if (transport.busy) transport.finish(); resetLesson(); });
+$('next-basic').addEventListener('click', () => { if (mode === 'learn' && lessonIndex < LESSONS.learn.length - 1) changeLesson('learn', lessonIndex + 1); });
 let visibleLessons = 20;
 const filteredLessons = () => filterLessons(LESSONS[mode] || [], { query: $('lesson-search').value, category: $('lesson-category').value, length: $('lesson-length').value });
 function renderLessonList() {
   const matches = filteredLessons(), options = $('lesson-options'); options.replaceChildren();
-  $('lesson-count').textContent = `${matches.length} / ${LESSONS[mode].length} 篇`;
+  $('lesson-count').textContent = `${matches.length} / ${LESSONS[mode].length} ${mode === 'learn' ? '课' : '篇'}`;
   $('random-filtered').disabled = !matches.length;
   if (!matches.length) { const empty = document.createElement('p'); empty.textContent = '没有匹配的内容，试试别的关键词或放宽筛选。'; options.append(empty); }
   for (const { lesson: item, index } of matches.slice(0, visibleLessons)) {
@@ -228,6 +262,10 @@ $('more-lessons').addEventListener('click', () => { visibleLessons += 20; render
 $('choose-lesson').addEventListener('click', () => {
   if (transport.busy) transport.finish(); cancelInput();
   if (mode === 'free') return;
+  $('lesson-picker-title').textContent = mode === 'learn' ? '选择基础课程' : '选择练习内容';
+  document.querySelector('.library-note').textContent = mode === 'learn'
+    ? '按字母、数字和混合复习排列。先听再敲，每个字之间稍停；基础课始终显示点划提示。'
+    : '经典英文原作节选，已转为大写并调整标点以适配电码。通联为虚构练习。节选与来源信息可离线浏览，外部链接需联网。';
   $('lesson-search').value = ''; $('lesson-length').value = ''; $('lesson-category').replaceChildren(new Option('全部类别', ''));
   for (const category of new Set(LESSONS[mode].map(item => item.level))) $('lesson-category').append(new Option(category, category));
   visibleLessons = 20; renderLessonList(); $('lesson-dialog').showModal(); $('lesson-options').scrollTop = 0;
@@ -260,7 +298,7 @@ function renderSettings() {
   $('manual-timing-controls').hidden = settings.timingMode !== 'manual';
   const unit = settings.timingMode === 'manual' ? settings.threshold / 2 : timingForTempo(settings.tempo).unit;
   $('timing-preview').textContent = `${settings.timingMode === 'manual' ? '手动设置' : `参考节奏 ${settings.tempo} WPM`}：点约 ${Math.round(unit)}ms，划约 ${Math.round(unit * 3)}ms；按压少于 ${settings.threshold}ms 判为点。字间等待 ${settings.gap}ms，自由模式停顿约 ${Math.round(settings.gap * 7 / 3)}ms 自动分词。`;
-  $('show-hint').checked = settings.hint; renderTarget();
+  $('show-hint').checked = mode === 'learn' || settings.hint; $('show-hint').disabled = mode === 'learn'; renderTarget();
 }
 function applyTiming() { cancelInput(); keyer.configure(settings.threshold, settings.gap); renderSettings(); save(); }
 function setTempo(value) {

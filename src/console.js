@@ -7,9 +7,11 @@ export function setupConsole(onLayoutChange) {
   const save = () => { try { localStorage.setItem('cw-station-immersive', String(manual)); } catch { /* Optional preference. */ } };
   function sync() {
     const enabled = compact.matches || manual;
-    if (document.body.classList.contains('console-mode') !== enabled) onLayoutChange();
+    const changed = document.body.classList.contains('console-mode') !== enabled;
+    if (changed) onLayoutChange();
     document.body.classList.toggle('console-mode', enabled);
     document.documentElement.classList.toggle('console-root', enabled);
+    if (enabled && changed) window.scrollTo(0, 0);
     label.textContent = compact.matches ? document.fullscreenElement ? '退出' : '全屏' : manual ? '退出' : '沉浸';
     button.setAttribute('aria-pressed', String(compact.matches ? !!document.fullscreenElement : manual));
     button.setAttribute('aria-label', compact.matches ? '切换全屏' : '切换沉浸模式');

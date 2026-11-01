@@ -61,7 +61,7 @@ components:
   mode-switch:
     rounded: "{rounded.switch-tray}"
     padding: "4px"
-    width: "340px"
+    width: "440px"
   paper:
     textColor: "#3b4a37"
     padding: "25px 30px 0"
@@ -159,7 +159,8 @@ Cabinet corners are broad and softened, shrinking from the machine radius to the
 
 ## Components
 
-- **Mode switch:** a recessed three-segment navigation tray. The selected `aria-pressed` button has a pale metal gradient, dark lettering, and a slight raised shadow. Hover brightens unselected lettering; transitions run for 150ms.
+- **Mode switch:** a recessed four-segment navigation tray: 基础学习、英文练习、模拟通联、自由发报. The desktop tray is 440px wide; the compact tray fills its available width. The selected `aria-pressed` button has a pale metal gradient, dark lettering, and a slight raised shadow. Hover brightens unselected lettering; transitions run for 150ms.
+- **Beginner paper:** separate rows of eight repeated characters with a small Morse caption at the left. Keep the active character highlight and completed strike-through; the paper scrolls to the current row while the machine stays fixed. A short introduction explains short/long presses. The footer supplies 下一课 alongside 重来; 选课 opens the existing library as a course picker. Always show hints in this mode and keep its 8 WPM initial timing separate from normal practice preferences.
 - **Paper:** warm shaded sheet with a roller, perforated sides, and torn lower edge. Pending text is muted; completed characters fade and strike through; the current character uses a filled olive highlight and brass underline. A mistake briefly pulses brick red over 350ms.
 - **Telegraph key:** one semantic button contains decorative base, contact, pivot, arm, and knob. Pressing rotates the arm from −8° to 4° over 80ms and compresses the knob shadow. Keep the interaction tied to actual pressed state, not a looping animation.
 - **Sound toggle:** recessed pill with a pale metal thumb. `aria-checked=true` moves the thumb 16px on desktop or 14px on mobile; the transition is 180ms.
