@@ -38,6 +38,11 @@
         <div class="signal-block"><span class="panel-label" id="receiver-label">输入状态</span><div class="signal-readout"><span id="live-code">等待敲击</span><span id="decoded"></span></div><div class="gap-track"><div id="gap-fill"></div></div></div>
       </div>
       <p id="feedback" class="feedback" role="status" aria-live="polite">短按为点，长按为划；停顿后自动识别。</p>
+      <button id="speed-button" class="speed-meter" aria-haspopup="dialog" aria-controls="speed-dialog">
+        <span class="speed-caption"><span class="panel-label">平均发报速度 · 最近 30 s</span><span id="speed-sampling">敲击后开始计速</span></span>
+        <span class="speed-reading"><strong id="speed-value">0.0</strong><span>WPM</span></span>
+        <span class="speed-more">速度手册 <span aria-hidden="true">↗</span></span>
+      </button>
       <div class="key-deck">
         <div class="key-meta"><span>手动电键</span><span>600 Hz</span></div>
         <button id="telegraph-key" class="telegraph-key" aria-label="发报电键，按住发长音，短按发短音" aria-pressed="false" aria-describedby="key-instructions">
@@ -59,6 +64,28 @@
   </main>
   <dialog id="lesson-dialog"><div class="dialog-heading"><h2>选择练习内容</h2><button class="icon-button" id="close-lessons" aria-label="关闭"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div id="lesson-options"></div></dialog>
   <dialog id="install-dialog"><div class="dialog-heading"><h2>把小站放在桌面上</h2><button class="icon-button" id="close-install" aria-label="关闭"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><p>iPhone / iPad：用 Safari 打开，点击「分享」，再选「添加到主屏幕」。</p><p>Android / 电脑：在浏览器菜单里选择「安装应用」或「添加到主屏幕」。</p><p>首次联网打开并准备好离线资源后，就能随时练习。</p></dialog>
+  <dialog id="speed-dialog" tabindex="-1" aria-labelledby="speed-title">
+    <div class="dialog-heading"><div><span class="guide-eyebrow">CW STATION · FIELD NOTES</span><h2 id="speed-title">快慢之间，自有节奏。</h2></div><button class="icon-button" id="close-speed" aria-label="关闭速度手册"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    <div class="speed-guide-body">
+      <section class="speed-session" aria-label="最近 30 秒的实时统计">
+        <span class="guide-eyebrow">你的最近 30 秒 · 实时更新</span>
+        <dl class="speed-stats"><div><dt>折合词 / 分</dt><dd><span id="speed-detail-wpm">0.0</span><small>WPM</small></dd></div><div><dt>字符 / 分</dt><dd id="speed-detail-cpm">0</dd></div><div><dt>目标正确率</dt><dd id="speed-detail-accuracy">—</dd></div></dl>
+        <p id="speed-window-summary"></p><p id="speed-comparison"></p>
+      </section>
+      <details class="speed-method"><summary>这个速度是怎么算的？</summary><p>每 5 个已识别的非空格字符折合 1 词。WPM = 最近 30 秒已识别字符数 × 0.4；字符 / 分 = 字符数 × 2。字符在停顿完成、识别出来时记入，满 30 秒移出；停顿也算时间。开始时仍除以完整 30 秒，并显示采样进度，避免刚敲一个字就出现虚高速度。</p><p>错字计入发报量，但降低练习正确率；未知编码只计入未识别次数。试听、空格、删除和取消的半个字符不增加速度。换篇、重来或切换模式会重新计时；切到后台仍会自然过期。</p><p>这是实际输出的折合速度，不是按标准词 PARIS 的点划时长计算的电键速度。不同字符长度、字符间隔与错误处理都会影响比较。下面的课程、听抄和比赛数据保留各自口径，不能直接当作本应用的等级考试。</p></details>
+      <section class="speed-guide-section"><h3>多少速度，能聊起来？</h3><p>能否通联取决于双方能否听懂，也取决于信号与发报清晰度。小站建议先把 <strong>5 → 10 → 15 → 20 WPM</strong> 当作练习路标，正确、稳定地发送，再逐步提速；这不是统一的资格门槛。</p>
+        <div class="speed-benchmarks">
+          <article><div class="benchmark-value">5–15<small>WPM</small></div><div><h4>慢下来，也有同伴</h4><p>ARRL 的 W1AW 慢速练习广播包含 5、7.5、10、13、15 WPM。刚入门，从低速听清每个字开始。<a href="https://www.arrl.org/w1aw-operating-schedule" target="_blank" rel="noopener noreferrer">W1AW 时刻表 ↗</a></p></div></article>
+          <article><div class="benchmark-value">≤20<small>WPM</small></div><div><h4>业余电台的慢速聚会</h4><p>CWops 的 SST 慢速活动上限为 20 WPM；MST 面向 20–25 WPM。它们是活动速度范围，不是日常聊天的最低要求。<a href="https://cwops.org/cw-resources/" target="_blank" rel="noopener noreferrer">CWops 通联资源 ↗</a></p></div></article>
+          <article><div class="benchmark-value">20<small>WPM · 听抄</small></div><div><h4>军校的一张历史成绩单</h4><p>美国空军 2011 年介绍的摩尔斯课程，以听抄 20 词（100 字符）/ 分作为毕业要求，课程标准长度为 81 个训练日。这是特定课程的历史标准，并非所有军队现在统一采用的速度。<a href="https://www.goodfellow.af.mil/Newsroom/Commentaries/Display/Article/375253/yes-we-still-teach-morse-code/" target="_blank" rel="noopener noreferrer">美国空军原文 · 2011 ↗</a></p></div></article>
+        </div>
+      </section>
+      <section class="speed-guide-section"><h3>新手要练多久？</h3><p>看训练方式与练习量，没有统一倒计时。CWops CW Academy 每级课程为 8 周、每周两次课，并要求每天约 1 小时练习；以下是课程目标，不是进度保证。</p><ol class="speed-course"><li><span>入门</span><strong>零基础 → 6+ WPM</strong></li><li><span>基础</span><strong>6 → 10+ WPM</strong></li><li><span>中级</span><strong>10 → 20+ WPM</strong></li><li><span>高级</span><strong>20 → 30+ WPM</strong></li></ol><p>课程包含接收与通联训练，要求使用自动电键拨杆；只在小站练触屏发报，不能直接等同于完成该课程。<a href="https://cwops.org/cw-academy/cw-academy-options/" target="_blank" rel="noopener noreferrer">查看课程条件与目标 ↗</a></p></section>
+      <section class="speed-guide-section record-note"><span class="guide-eyebrow">把电波变成竞技</span><h3>一分钟，283 个字母。</h3><p>IARU HST 世界纪录表的男子字母发报项目：Andrei Bindasov（EU7KI），2007 年贝尔格莱德，283 字符 / 分、0 错误。同一张表中的男子字母接收纪录为 300 字符 / 分（2009 年）。发送与接收是两个项目，字母、数字、混合文本也分开排名。</p><p>竞技规则允许手动或电子电键。这里展示的是指定项目纪录，并非“人类在所有形式下的绝对最高速度”；也不宜直接与触屏练习的 WPM 排名。<a href="https://www.iaru-r1.org/about-us/committees-and-working-groups/hst/hst-world-records/" target="_blank" rel="noopener noreferrer">IARU 世界纪录表 ↗</a> · <a href="https://www.iaru-r1.org/about-us/committees-and-working-groups/hst/hst-rules/" target="_blank" rel="noopener noreferrer">竞赛规则 ↗</a></p></section>
+      <section class="speed-guide-section"><h3>电波冷知识</h3><p><strong>不是每个“五字词”都一样长。</strong> E 只有一个点，T 只有一个划。连续发 E 和连续发 T，即使字符数相同，也不需要相同的按压时间。这就是为什么“输出了多少字符”与“点划本身有多快”要分开看。</p><p><strong>新闻也有自己的语速。</strong> W1AW 的 CW 公告使用 18 WPM。练习有一天变成听新闻，也是一个有趣的小目标。<a href="https://www.arrl.org/w1aw-operating-schedule" target="_blank" rel="noopener noreferrer">广播说明 ↗</a></p></section>
+      <p class="guide-footnote">资料核对：2026-11-01。手册可离线阅读，外部来源需联网打开。先发清楚，再发得快。73！</p>
+    </div>
+  </dialog>
   <noscript>请启用 JavaScript，以使用发报电键和离线练习。</noscript>
   <script type="module" src="./src/app.js"></script>
 </body>

@@ -1,6 +1,7 @@
 import { MORSE, pretty, MorseKeyer } from './morse.js';
 import { LESSONS } from './content.js';
 import { Sidetone } from './audio.js';
+import { SendingSpeed } from './speed.js';
 
 const $ = id => document.getElementById(id);
 let saved = {};
@@ -12,6 +13,7 @@ let audition = false, auditionToken = 0, safetyTimer, pressTimer, installPrompt;
 let lastReceived = null;
 const feedback = text => { $('feedback').textContent = text; };
 const tone = new Sidetone(feedback);
+const speed = new SendingSpeed();
 const lesson = () => LESSONS[mode]?.[lessonIndex];
 const target = () => lesson()?.text[position];
 const save = () => { try { localStorage.setItem('cw-station-settings', JSON.stringify(settings)); } catch { /* Private mode may disallow storage. */ } };
@@ -20,6 +22,7 @@ const keyer = new MorseKeyer({ threshold: settings.threshold, gap: settings.gap,
   onLetter(letter, code) {
     $('gap-fill').classList.remove('counting');
     lastReceived = { letter, code, matched: mode === 'free' ? null : letter === target() };
+    speed.record(letter, lastReceived.matched); renderSpeed();
     if (mode === 'free') {
       freeText += letter ?? '□';
       feedback(letter ? `已收到 ${letter} · ${pretty(code)}` : `未识别 ${pretty(code)}，可删除后重试。`);
@@ -103,9 +106,9 @@ function cancelInput() {
   if (interrupted) feedback(mode === 'free' ? '未完成的输入已取消，可以重新敲击。' : `未完成的输入已取消，请重新输入 ${target()}。`);
 }
 function press(source) {
-  if (activeInput !== null || audition || $('lesson-dialog').open || $('install-dialog').open) return;
+  if (activeInput !== null || audition || document.querySelector('dialog[open]')) return;
   if (mode !== 'free' && !target()) { feedback('本篇已完成，点击「换一篇」开始新的练习。'); return; }
-  activeInput = source; keyer.press(); setPressed(true); tone.start(); renderReceiver();
+  activeInput = source; speed.start(); keyer.press(); setPressed(true); tone.start(); renderReceiver();
   feedback(mode === 'free' ? '正在输入；松开并停顿后自动识别。' : `正在输入 ${target()}；松开并停顿后自动识别。`);
   $('gap-fill').classList.remove('counting');
   pressTimer = setTimeout(() => { $('signal-state').textContent = '长音 −'; }, settings.threshold);
@@ -139,6 +142,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) cance
 
 function resetLesson() {
   cancelInput(); position = attempts = correct = 0; freeText = ''; lastReceived = null;
+  speed.reset(); renderSpeed();
   $('lesson-title').textContent = mode === 'free' ? 'Your words, your rhythm.' : lesson().title;
   $('lesson-level').textContent = mode === 'free' ? '自由纸带' : lesson().level;
   $('choose-lesson').hidden = mode === 'free'; $('free-actions').hidden = mode !== 'free';
@@ -165,6 +169,19 @@ $('choose-lesson').addEventListener('click', () => {
 });
 $('close-lessons').addEventListener('click', () => $('lesson-dialog').close());
 $('close-install').addEventListener('click', () => $('install-dialog').close());
+$('speed-button').addEventListener('click', () => { cancelInput(); renderSpeed(); $('speed-dialog').showModal(); });
+$('close-speed').addEventListener('click', () => $('speed-dialog').close());
+function renderSpeed() {
+  const stats = speed.snapshot();
+  $('speed-value').textContent = stats.wpm.toFixed(1);
+  $('speed-sampling').textContent = !stats.started ? '敲击后开始计速' : stats.sampledSeconds < 30 ? `采样中 ${stats.sampledSeconds}/30 s` : '滚动统计 · 含停顿';
+  $('speed-detail-wpm').textContent = stats.wpm.toFixed(1);
+  $('speed-detail-cpm').textContent = stats.cpm;
+  $('speed-detail-accuracy').textContent = mode === 'free' || stats.accuracy === null ? '—' : `${stats.accuracy}%`;
+  $('speed-window-summary').textContent = `最近 30 秒：已识别 ${stats.recognized} 字符，未识别 ${stats.invalid} 次。${mode === 'free' ? '自由模式不核对目标正确率。' : `正确输出 ${stats.correctWpm.toFixed(1)} WPM。`}`;
+  $('speed-comparison').textContent = stats.wpm > 0 ? `保持当前平均节奏，发出 100 个字符约需 ${Math.round(6000 / stats.cpm)} 秒。慢一点也没关系，先把每个字发清楚。` : '先敲出一个字符。速度会随着最近 30 秒的实际输出更新，停下来也会慢慢回落。';
+}
+setInterval(renderSpeed, 250);
 for (const [button, panel] of [['settings-button', 'advanced-settings'], ['reference-button', 'reference']]) {
   $(button).addEventListener('click', () => { $(panel).hidden = !$(panel).hidden; $(button).setAttribute('aria-expanded', String(!$(panel).hidden)); });
 }

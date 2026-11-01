@@ -121,3 +121,52 @@ test('narrow screens remain usable and every paper character can be completed', 
   await expect(page.locator('#accuracy')).toHaveText('准确率 100%');
   await expect(page.locator('#progress-fill')).toHaveAttribute('style', 'width: 100%;');
 });
+
+test('speed meter follows a rolling window and handbook is accessible offline', async ({ page, context }, info) => {
+  await page.clock.install();
+  await page.goto('/'); await expect(page.locator('#offline-state')).toHaveText('离线已就绪');
+  await page.locator('#sound').click();
+  await typeMorse(page, 'AE'); // A correct, E incorrect: both physically sent.
+  await expect(page.locator('#speed-value')).toHaveText('0.8');
+  await page.locator('#speed-button').click();
+  await expect(page.getByRole('dialog', { name: '快慢之间，自有节奏。' })).toBeVisible();
+  await expect(page.locator('#speed-detail-cpm')).toHaveText('4');
+  await expect(page.locator('#speed-detail-accuracy')).toHaveText('50%');
+  await expect(page.locator('#speed-window-summary')).toContainText('正确输出 0.4 WPM');
+  await page.locator('#speed-dialog').focus();
+  await page.keyboard.press('Space'); await page.clock.runFor(1000);
+  await expect(page.locator('#telegraph-key')).toHaveAttribute('aria-pressed', 'false');
+  await page.screenshot({ path: `.impeccable/review/speed-guide-${info.project.name}.png` });
+  await page.setViewportSize({ width: 320, height: 740 });
+  expect(await page.locator('#speed-dialog').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+  await page.locator('.speed-method summary').click();
+  await expect(page.locator('.speed-method')).toHaveAttribute('open', '');
+  await page.clock.runFor(30000);
+  await expect(page.locator('#speed-detail-wpm')).toHaveText('0.0');
+  await page.keyboard.press('Escape'); await expect(page.locator('#speed-dialog')).not.toBeVisible();
+  await page.getByRole('button', { name: '自由发报', exact: true }).click();
+  await expect(page.locator('#speed-sampling')).toHaveText('敲击后开始计速');
+  await typeMorse(page, 'E'); await page.locator('#settings-button').click();
+  await page.locator('#delete-letter').click(); await page.locator('#insert-space').click();
+  await expect(page.locator('#speed-value')).toHaveText('0.4');
+  await page.locator('#speed-button').click();
+  await expect(page.locator('#speed-detail-accuracy')).toHaveText('—');
+  await page.locator('#close-speed').click();
+  await context.setOffline(true); await page.reload();
+  await page.locator('#speed-button').click(); await expect(page.locator('#speed-title')).toBeVisible();
+  await expect(page.locator('.record-note')).toContainText('283');
+});
+
+test('audition and cancelled input do not increase sending speed', async ({ page }) => {
+  await page.clock.install(); await page.goto('/');
+  await page.locator('#listen').click(); await page.clock.runFor(2000);
+  await expect(page.locator('#speed-value')).toHaveText('0.0');
+  await expect(page.locator('#speed-sampling')).toHaveText('敲击后开始计速');
+  await page.locator('#sound').click(); await typeMorse(page, 'A');
+  await page.locator('#telegraph-key').focus();
+  await page.keyboard.down('Space'); await page.clock.runFor(70); await page.keyboard.up('Space');
+  await page.locator('#speed-button').click(); // cancels the pending letter
+  await page.clock.runFor(1000); await expect(page.locator('#speed-value')).toHaveText('0.4');
+  await page.locator('#close-speed').click(); await page.locator('#restart').click();
+  await expect(page.locator('#speed-value')).toHaveText('0.0');
+});
