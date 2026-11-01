@@ -31,7 +31,7 @@ test('library searches all excerpts, combines filters, selects and randomizes of
   await page.locator('#choose-lesson').click(); await expect(page.locator('#lesson-count')).toHaveText('21 / 21 篇');
 });
 
-test('paper ejects then feeds with staged alignment; latest request wins and background settles', async ({ page }, info) => {
+test('paper rolls continuously without a mid-feed pause; latest request wins and background settles', async ({ page }, info) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' }); await page.goto('/'); await page.locator('#sound').click();
   const assembly = page.locator('.paper-assembly');
   const before = await page.locator('.paper-window').boundingBox();
@@ -40,11 +40,18 @@ test('paper ejects then feeds with staged alignment; latest request wins and bac
   await page.locator('#telegraph-key').focus(); await page.keyboard.down('Enter'); await page.waitForTimeout(70); await page.keyboard.up('Enter');
   await expect(page.locator('#telegraph-key')).toHaveAttribute('aria-pressed', 'false');
   await expect(assembly).toHaveAttribute('data-transport', 'feed');
-  await page.evaluate(() => {
-    const animation = document.querySelector('.paper').getAnimations()[0];
-    animation.pause(); animation.currentTime = 225; // paper caught, paused for alignment
+  const travel = await page.evaluate(() => {
+    const paper = document.querySelector('.paper');
+    const animation = paper.getAnimations()[0];
+    const duration = animation.effect.getTiming().duration;
+    animation.pause(); animation.currentTime = duration * .26;
+    const first = new DOMMatrixReadOnly(getComputedStyle(paper).transform).m42;
+    animation.currentTime = duration * .34;
+    const second = new DOMMatrixReadOnly(getComputedStyle(paper).transform).m42;
+    return second - first;
   });
-  await page.screenshot({ path: `.impeccable/review/paper-catch-${info.project.name}.png`, fullPage: true });
+  expect(travel).toBeGreaterThan(2);
+  await page.screenshot({ path: `.impeccable/review/paper-roll-${info.project.name}.png`, fullPage: true });
   const during = await page.locator('.paper-window').boundingBox();
   expect(Math.abs(during.y-before.y)).toBeLessThan(2);
   await page.evaluate(() => document.querySelector('.paper').getAnimations()[0].play());
