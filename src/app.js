@@ -135,12 +135,16 @@ document.addEventListener('dblclick', event => {
   event.preventDefault();
   window.getSelection()?.removeAllRanges();
 }, { capture: true });
-const isEditing = element => element.closest('input, textarea, select, [contenteditable="true"], dialog') || (element.closest('button, a') && element !== key);
+const isEditing = element => element.closest('input, textarea, select, summary, [contenteditable="true"], dialog') || (element.closest('button, a') && element !== key);
+const keyingCodes = new Set(['Space', 'Enter', 'NumpadEnter']);
 window.addEventListener('keydown', event => {
-  if (event.code !== 'Space' || isEditing(event.target)) return;
-  event.preventDefault(); if (!event.repeat) press('keyboard');
+  if (!keyingCodes.has(event.code) || event.altKey || event.ctrlKey || event.metaKey || event.isComposing || isEditing(event.target)) return;
+  event.preventDefault(); if (!event.repeat) press(`keyboard:${event.code}`);
 });
-window.addEventListener('keyup', event => { if (event.code === 'Space' && activeInput === 'keyboard') { event.preventDefault(); release('keyboard'); } });
+window.addEventListener('keyup', event => {
+  const source = `keyboard:${event.code}`;
+  if (keyingCodes.has(event.code) && activeInput === source) { event.preventDefault(); release(source); }
+});
 window.addEventListener('blur', cancelInput);
 document.addEventListener('visibilitychange', () => { if (document.hidden) cancelInput(); });
 

@@ -45,6 +45,25 @@ async function tap(page, duration, selector = '#telegraph-key') {
   await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   await client.detach();
 }
+test('Enter, numpad Enter and Space key by duration without interfering with each other or controls', async ({ page }) => {
+  await page.clock.install(); await page.goto('/'); await page.locator('#sound').click();
+  await page.getByRole('button', { name: '自由发报', exact: true }).click();
+  await page.locator('#telegraph-key').focus();
+  await page.keyboard.down('Enter'); await page.clock.runFor(70); await page.keyboard.up('Enter');
+  await page.clock.runFor(700); await expect(page.locator('.free-output')).toHaveText('E');
+  await page.keyboard.down('Enter'); await page.clock.runFor(100);
+  await page.keyboard.down('Enter'); // repeat must not restart the press
+  await page.keyboard.down('Space'); await page.keyboard.up('Space');
+  await expect(page.locator('#telegraph-key')).toHaveAttribute('aria-pressed', 'true');
+  await page.clock.runFor(150); await page.keyboard.up('Enter'); await page.clock.runFor(700);
+  await expect(page.locator('.free-output')).toHaveText('ET');
+  await page.keyboard.down('NumpadEnter'); await page.clock.runFor(70); await page.keyboard.up('NumpadEnter');
+  await page.clock.runFor(700); await expect(page.locator('.free-output')).toHaveText('ETE');
+  await page.locator('#sound').focus(); await page.keyboard.press('Enter');
+  await expect(page.locator('#sound')).toHaveAttribute('aria-checked', 'true');
+  await expect(page.locator('#telegraph-key')).toHaveAttribute('aria-pressed', 'false');
+  await page.clock.runFor(700); await expect(page.locator('.free-output')).toHaveText('ETE');
+});
 test('long touches and double clicks never select text or open a context menu', async ({ page }) => {
   await page.goto('/'); await page.locator('#sound').click();
   await page.getByRole('button', { name: '自由发报', exact: true }).click();
